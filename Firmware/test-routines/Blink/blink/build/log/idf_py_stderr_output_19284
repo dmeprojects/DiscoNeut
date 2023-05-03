@@ -1,0 +1,19 @@
+C:\Users\nick_\AppData\Local\Temp\confgen_tmpeiji8vq1:100: warning: '1' is not a valid value for the bool symbol SOC_I2S_NUM (defined at D:/Espressif/frameworks/esp-idf-v5.0.1\./components/soc/esp32c3/include/soc/Kconfig.soc_caps.in:354). Assignment ignored.
+CMake Error at D:/Espressif/frameworks/esp-idf-v5.0.1/tools/cmake/tool_version_check.cmake:36 (message):
+  
+
+  Tool doesn't match supported version from list ['esp-2022r1-11.2.0']:
+  C:/Users/nick_/.espressif/tools/riscv32-esp-elf/esp-12.2.0_20230208/riscv32-esp-elf/bin/riscv32-esp-elf-gcc.exe
+
+
+  Please try to run 'idf.py fullclean' to solve it.
+
+Call Stack (most recent call first):
+  D:/Espressif/frameworks/esp-idf-v5.0.1/components/esp_common/project_include.cmake:10 (check_expected_tool_version)
+  D:/Espressif/frameworks/esp-idf-v5.0.1/tools/cmake/build.cmake:380 (include)
+  D:/Espressif/frameworks/esp-idf-v5.0.1/tools/cmake/build.cmake:599 (__build_process_project_includes)
+  D:/Espressif/frameworks/esp-idf-v5.0.1/tools/cmake/project.cmake:440 (idf_build_process)
+  CMakeLists.txt:6 (project)
+
+
+ninja: error: rebuilding 'build.ninja': subcommand failed

@@ -14,6 +14,9 @@
 #include "led_strip.h"
 #include "sdkconfig.h"
 
+/*Custom patterns*/
+#include "patterns.h"
+
 static const char *TAG = "example";
 
 /* Use project configuration menu (idf.py menuconfig) to choose the GPIO to blink,
@@ -21,10 +24,15 @@ static const char *TAG = "example";
 */
 #define BLINK_GPIO      2
 #define LED_PSU_GPIO    0
+#define LED_INTENSITY   10
+
+
 
 static uint8_t s_led_state = 0;
 
 static led_strip_handle_t led_strip;
+
+uint8_t lLed = 0;
 
 static void initLedPower( void )
 {
@@ -50,6 +58,56 @@ static void blink_led(void)
         /* Set all LED off to clear all pixels */
         led_strip_clear(led_strip);
     }
+}
+
+static void run_led(void)
+{
+    static uint8_t lLedCounter = 0;
+    static uint8_t lLedState = 0;
+
+    switch (lLedState)
+    {
+        case 0:     //Default state, just turn each led on
+        led_strip_set_pixel(led_strip, lLedCounter++, LED_INTENSITY, 0, 0);
+
+        if (lLedCounter > 39)
+        {
+            lLedCounter = 0;
+            lLedState++;
+        }
+        break;
+
+        case 1: //switch the color on each led
+
+        led_strip_set_pixel(led_strip, lLedCounter++, 0, LED_INTENSITY, 0);
+
+                if (lLedCounter > 39)
+        {
+            lLedCounter = 0;
+            lLedState++;
+        }
+        break;
+
+        case 2: //switch the color on each led
+
+        led_strip_set_pixel(led_strip, lLedCounter++, 0, 0, LED_INTENSITY);
+
+                if (lLedCounter > 39)
+        {
+            lLedCounter = 0;
+            lLedState++;
+        }
+        break;
+        
+        case 3: //reset color
+
+        led_strip_clear(led_strip);
+
+        lLedState = 0;
+        break;
+    }
+
+    led_strip_refresh(led_strip);
 }
 
 static void configure_led(void)
@@ -79,9 +137,10 @@ void app_main(void)
 
     while (1) {
         ESP_LOGI(TAG, "Turning the LED %s!", s_led_state == true ? "ON" : "OFF");
-        blink_led();
+        //blink_led();
+        run_led();
         /* Toggle the LED state */
         s_led_state = !s_led_state;
-        vTaskDelay(CONFIG_BLINK_PERIOD / portTICK_PERIOD_MS);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }

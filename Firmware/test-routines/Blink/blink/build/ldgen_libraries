@@ -8,7 +8,6 @@ D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-
 D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-idf/bootloader_support/libbootloader_support.a
 D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-idf/esp_partition/libesp_partition.a
 D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-idf/app_update/libapp_update.a
-D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-idf/esp_mm/libesp_mm.a
 D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-idf/spi_flash/libspi_flash.a
 D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-idf/pthread/libpthread.a
 D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-idf/esp_system/libesp_system.a
@@ -31,7 +30,6 @@ D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-
 D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-idf/lwip/liblwip.a
 D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-idf/esp_netif/libesp_netif.a
 D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-idf/wpa_supplicant/libwpa_supplicant.a
-D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-idf/esp_coex/libesp_coex.a
 D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-idf/esp_wifi/libesp_wifi.a
 D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-idf/unity/libunity.a
 D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-idf/cmock/libcmock.a

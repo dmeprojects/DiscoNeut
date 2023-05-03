@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 file(MAKE_DIRECTORY
-  "D:/ESP-IDF/esp-idf/components/bootloader/subproject"
+  "D:/Espressif/frameworks/esp-idf-v5.0.1/components/bootloader/subproject"
   "D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/bootloader"
   "D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/bootloader-prefix"
   "D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/bootloader-prefix/tmp"
