@@ -57,7 +57,7 @@ int scrollCircle ( void )
 
     led_strip_clear(led_strip);
 
-    for( mainLoops = 0; mainLoops < 10; mainLoops++)
+    for( mainLoops = 0; mainLoops < 20; mainLoops++)
     {
         for( loops = 0; loops < sizeof(CIRCLE_LEDS); loops++)
         {

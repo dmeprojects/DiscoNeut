@@ -20,7 +20,7 @@
 #include "sdkconfig.h"
 
 /*System perhiperhals*/
-#include "driver/i2s.h"
+#include "driver/i2s_std.h"
 #include "driver/gpio.h"
 
 /*Custom patterns*/
@@ -45,6 +45,9 @@ static const char *TAG = "example";
 #define MIC_WS_GPIO     9
 #define MIC_EN_GPIO     1
 
+/*MIC BUFFER DEFINES*/
+#define MIC_BUFFER_SIZE 64
+
 
 
 /*LED VARIABLES*/
@@ -53,25 +56,34 @@ led_strip_handle_t led_strip;
 
 /*MIC VARIABLES*/
 // I2S configuration for ICS-43432 microphone
-static const i2s_config_t i2s_config = 
+i2s_chan_handle_t rxHandle;
+i2s_chan_config_t i2s_channel_config = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_AUTO, I2S_ROLE_MASTER);
+i2s_std_config_t i2s_config = 
 {
-    .mode = I2S_MODE_MASTER | I2S_MODE_RX,
-    .sample_rate = 16000,
-    .bits_per_sample = 24,
-    .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
-    .communication_format = I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_MSB,
-    .dma_buf_count = 6,
-    .dma_buf_len = 60,
-    .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
+    .clk_cfg = 
+    {
+        .sample_rate_hz = 48000,
+        .clk_src = I2S_CLK_SRC_DEFAULT,
+        .mclk_multiple = I2S_MCLK_MULTIPLE_384,
+    },
+    .slot_cfg = I2S_STD_MSB_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_24BIT, I2S_SLOT_MODE_MONO),
+    .gpio_cfg = 
+    {
+        .mclk = I2S_GPIO_UNUSED,
+        .bclk = MIC_CLK_GPIO,
+        .ws = MIC_WS_GPIO,
+        .dout = I2S_GPIO_UNUSED,
+        .din = MIC_SD_GPIO,
+        .invert_flags = 
+        {
+            .mclk_inv = false,
+            .bclk_inv = false,
+            .ws_inv = false,
+        },
+    },
 };
-// I2S pin configuration for ICS-43432 microphone
-static const i2s_pin_config_t  i2s_pin_config = 
-{
-    .bck_io_num = MIC_CLK_GPIO,
-    .ws_io_num = MIC_WS_GPIO,
-    .data_out_num = I2S_PIN_NO_CHANGE,
-    .data_in_num = MIC_SD_GPIO,
-};
+
+//int16_t i2sBuffer[MIC_BUFFER_SIZE];
 
 TaskHandle_t audioReceiveTaskHandle = NULL;
 
@@ -170,14 +182,14 @@ static void configure_led(void)
 }
 
 // Function to calculate the RMS amplitude of audio data
-float get_volume(uint8_t* data, size_t len)
+uint32_t get_volume(uint32_t* data, size_t len)
 {
-    float sum = 0.0;
+    int32_t sum = 0;
     for (int i = 0; i < len / 4; i++) {
-        int32_t sample = *((int32_t*) &data[i * 4]);
-        sum += (float) (sample * sample);
+        uint32_t sample = *((uint32_t*) &data[i * 4]);
+        sum += (uint32_t) (sample * sample);
     }
-    float rms = sqrtf(sum / (float) (len / 4));
+    uint32_t rms = sqrtf(sum / (uint32_t) (len / 4));
     return rms;
 }
 
@@ -186,26 +198,41 @@ void audioReceiveTask ( void* pvParams)
     uint8_t lStartAudio;
     size_t bytes_read = 0;
     float volume;
+    esp_err_t lEspError = ESP_FAIL;
 
-    uint8_t* i2s_buffer = (uint8_t*) malloc(i2s_config.dma_buf_len * 2);
+    uint32_t lMicData[MIC_BUFFER_SIZE];
 
     // Start I2S data reception
-    i2s_zero_dma_buffer(I2S_NUM_0);
-    i2s_start(I2S_NUM_0);
+    lEspError = i2s_channel_enable(rxHandle);
+    if(lEspError != ESP_OK)
+    {
+        ESP_LOGE("AudioStart", "failed to enable channel with error code: %s", esp_err_to_name(lEspError));
+    }
 
     for(;;)
     {
         bytes_read = 0;
 
-        i2s_read(I2S_NUM_0, i2s_buffer, i2s_config.dma_buf_len * 2, &bytes_read, portMAX_DELAY);
+        //i2s_read(I2S_NUM_0, i2s_buffer, i2s_config.dma_buf_len * 2, &bytes_read, portMAX_DELAY);
+        lEspError = i2s_channel_read(rxHandle, lMicData, MIC_BUFFER_SIZE, &bytes_read, portMAX_DELAY);
+        if(lEspError != ESP_OK)
+        {
+            ESP_LOGE("AudioSample", "failed to read channel with error code: %s", esp_err_to_name(lEspError) );
+        }
+
+        ESP_LOGI("AudioSample", "Bytes read: %d", (unsigned int) bytes_read);
 
         // Calculate the volume of the received audio data
-        float volume = get_volume(i2s_buffer, bytes_read);
+        float volume = get_volume(lMicData, bytes_read);
 
-        ESP_LOGE("AudioTask", "Volume: %f", volume);
+        ESP_LOGE("AudioTask", "Volume: %lu", (unsigned long) volume);
 
         // Clear the I2S buffer for the next read
-        i2s_zero_dma_buffer(I2S_NUM_0);
+        //i2s_zero_dma_buffer(I2S_NUM_0);
+        for( uint8_t i = 0; i < MIC_BUFFER_SIZE; i++)
+        {
+            lMicData[i] = 0x00;
+        }
         
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
@@ -214,6 +241,7 @@ void audioReceiveTask ( void* pvParams)
 BaseType_t initMicrophone ( void)
 {
     BaseType_t lStatus = pdFALSE;
+    esp_err_t lEspError = ESP_FAIL;
 
     // Set microphone EN low (to enable mono)
     gpio_reset_pin(MIC_EN_GPIO);
@@ -221,13 +249,20 @@ BaseType_t initMicrophone ( void)
 
     gpio_set_level(MIC_EN_GPIO, 0);
 
+    vTaskDelay(pdMS_TO_TICKS(50));
 
     // Initialize I2S with the microphone configuration
-    i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
-    i2s_set_pin(I2S_NUM_0, &i2s_pin_config);
+    lEspError = i2s_new_channel(&i2s_channel_config, NULL, &rxHandle);
+    if(lEspError != ESP_OK)
+    {
+        ESP_LOGE("AudioInit", "failed to add channel with error code: %s", esp_err_to_name(lEspError));
+    }
 
-    // Allocate a buffer to hold the received audio data
-    uint8_t* i2s_buffer = (uint8_t*) malloc(i2s_config.dma_buf_len * 2);
+    lEspError = i2s_channel_init_std_mode(rxHandle, &i2s_config);
+        if(lEspError != ESP_OK)
+    {
+        ESP_LOGE("AudioInit", "failed to init channel with error code: %s", esp_err_to_name(lEspError));
+    }
 
     lStatus = xTaskCreate( audioReceiveTask, 
                             "AudioReceiveTask",
