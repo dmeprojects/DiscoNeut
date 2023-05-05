@@ -39,7 +39,7 @@ led_strip_handle_t led_strip;
 i2s_chan_handle_t rxHandle;
 
 i2s_chan_config_t chanConfig = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_AUTO, I2S_ROLE_MASTER);
-i2s_new_channel(&chanConfig, NULL, &rxHandle);
+
 
 uint8_t lLed = 0;
 
@@ -138,7 +138,17 @@ static void configure_led(void)
 void initMicrophone ( void)
 {
     //Set clock source
-    i2s_clock_src_t::I2S_CLK_SRC_DEFAULT;
+    //i2s_clock_src_t::I2S_CLK_SRC_DEFAULT;
+        
+    i2s_new_channel(&chanConfig, NULL, &rxHandle);
+
+    i2s_std_config_t stdCfg = 
+    {
+        .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(48000),
+        .slot_cfg = I2S_STD_MSB_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_24BIT, I2S_SLOT_MODE_MONO),
+
+    }
+
 
 
 }
@@ -153,7 +163,7 @@ void app_main(void)
     initLedPower();
 
     /*Init I2S interface*/
-    inicMicrophone();
+    initMicrophone();
 
     ledPower(1);
 
