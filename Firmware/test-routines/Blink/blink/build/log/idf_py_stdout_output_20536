@@ -1,0 +1,21 @@
+[0/1] Re-running CMake...
+-- ccache will be used for faster recompilation
+-- Building ESP-IDF components for target esp32c3
+Processing 2 dependencies:
+[1/2] espressif/led_strip (2.3.1)
+[2/2] idf (5.0.1)
+-- Project sdkconfig file D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/sdkconfig
+-- App "blink" version: f167c88-dirty
+-- Adding linker script D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-idf/esp_system/ld/memory.ld
+-- Adding linker script D:/Espressif/frameworks/esp-idf-v5.0.1/components/esp_system/ld/esp32c3/sections.ld.in
+-- Adding linker script D:/Espressif/frameworks/esp-idf-v5.0.1/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+-- Adding linker script D:/Espressif/frameworks/esp-idf-v5.0.1/components/esp_rom/esp32c3/ld/esp32c3.rom.api.ld
+-- Adding linker script D:/Espressif/frameworks/esp-idf-v5.0.1/components/esp_rom/esp32c3/ld/esp32c3.rom.libgcc.ld
+-- Adding linker script D:/Espressif/frameworks/esp-idf-v5.0.1/components/esp_rom/esp32c3/ld/esp32c3.rom.newlib.ld
+-- Adding linker script D:/Espressif/frameworks/esp-idf-v5.0.1/components/esp_rom/esp32c3/ld/esp32c3.rom.version.ld
+-- Adding linker script D:/Espressif/frameworks/esp-idf-v5.0.1/components/esp_rom/esp32c3/ld/esp32c3.rom.eco3.ld
+-- Adding linker script D:/Espressif/frameworks/esp-idf-v5.0.1/components/soc/esp32c3/ld/esp32c3.peripherals.ld
+-- Configuring incomplete, errors occurred!
+See also "D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/CMakeFiles/CMakeOutput.log".
+FAILED: build.ninja 
+D:\Espressif\tools\cmake\3.24.0\bin\cmake.exe --regenerate-during-build -SD:\DME-Projects_Software\DiscoNeut\Firmware\test-routines\Blink\blink -BD:\DME-Projects_Software\DiscoNeut\Firmware\test-routines\Blink\blink\build

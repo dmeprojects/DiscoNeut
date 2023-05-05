@@ -1,0 +1,5 @@
+[0/1] Re-running CMake...
+-- Configuring incomplete, errors occurred!
+See also "D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/CMakeFiles/CMakeOutput.log".
+FAILED: build.ninja 
+D:\Espressif\tools\cmake\3.24.0\bin\cmake.exe --regenerate-during-build -SD:\DME-Projects_Software\DiscoNeut\Firmware\test-routines\Blink\blink -BD:\DME-Projects_Software\DiscoNeut\Firmware\test-routines\Blink\blink\build

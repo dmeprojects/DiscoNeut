@@ -14,8 +14,12 @@
 #include "led_strip.h"
 #include "sdkconfig.h"
 
+/*System perhiperhals*/
+#include "driver/i2s_std.h"
+
+
 /*Custom patterns*/
-#include "patterns.h"
+#include "led_patterns.h"
 
 static const char *TAG = "example";
 
@@ -30,7 +34,12 @@ static const char *TAG = "example";
 
 static uint8_t s_led_state = 0;
 
-static led_strip_handle_t led_strip;
+led_strip_handle_t led_strip;
+
+i2s_chan_handle_t rxHandle;
+
+i2s_chan_config_t chanConfig = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_AUTO, I2S_ROLE_MASTER);
+i2s_new_channel(&chanConfig, NULL, &rxHandle);
 
 uint8_t lLed = 0;
 
@@ -126,21 +135,40 @@ static void configure_led(void)
     led_strip_clear(led_strip);
 }
 
+void initMicrophone ( void)
+{
+    //Set clock source
+    i2s_clock_src_t::I2S_CLK_SRC_DEFAULT;
+
+
+}
+
 void app_main(void)
 {
+
+    uint8_t loopCounter = 0;
 
     /* Configure the peripheral according to the LED type */
     configure_led();
     initLedPower();
+
+    /*Init I2S interface*/
+    inicMicrophone();
 
     ledPower(1);
 
     while (1) {
         ESP_LOGI(TAG, "Turning the LED %s!", s_led_state == true ? "ON" : "OFF");
         //blink_led();
-        run_led();
-        /* Toggle the LED state */
-        s_led_state = !s_led_state;
+
+        //leds_draw_circle();
+        drawCircle();
+
+        vTaskDelay(pdMS_TO_TICKS(100));
+        //run_led();
+
+        scrollCircle();
+
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }

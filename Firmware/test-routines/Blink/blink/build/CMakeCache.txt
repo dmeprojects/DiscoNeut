@@ -49,6 +49,10 @@ CMAKE_ASM_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
 //Flags used by the ASM compiler during RELWITHDEBINFO builds.
 CMAKE_ASM_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
 
+//For backwards compatibility, what version of CMake commands and
+// syntax should this version of CMake try to support.
+CMAKE_BACKWARDS_COMPATIBILITY:STRING=2.4
+
 //Choose the type of build, options are: None Debug Release RelWithDebInfo
 // MinSizeRel ...
 CMAKE_BUILD_TYPE:STRING=
@@ -295,6 +299,9 @@ ENABLE_TESTING:BOOL=
 //No help, variable specified on the command line.
 ESP_PLATFORM:UNINITIALIZED=1
 
+//Single output directory for building all executables.
+EXECUTABLE_OUTPUT_PATH:PATH=
+
 //Generate the auto-generated files as needed
 GEN_FILES:BOOL=
 
@@ -309,6 +316,9 @@ IDF_TOOLCHAIN:STRING=gcc
 
 //Install mbed TLS headers.
 INSTALL_MBEDTLS_HEADERS:BOOL=ON
+
+//Single output directory for building all libraries.
+LIBRARY_OUTPUT_PATH:PATH=
 
 //Explicitly link mbed TLS library to pthread.
 LINK_WITH_PTHREAD:BOOL=OFF

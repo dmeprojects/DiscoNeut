@@ -6,6 +6,9 @@
   ],
   "idf.portWin": "COM5",
   "files.associations": {
-    "led_strip.h": "c"
+    "led_strip.h": "c",
+    "stdio.h": "c",
+    "led_patterns.h": "c",
+    "i2s_std.h": "c"
   }
 }
