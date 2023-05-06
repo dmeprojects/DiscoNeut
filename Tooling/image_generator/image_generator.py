@@ -1,5 +1,8 @@
 import tkinter as tk
+from tkinter import *
+from tkinter import colorchooser
 from PIL import ImageTk
+from tkinter.colorchooser import *
 
 # Define a function to change the color of the selected circles
 def change_color(color):
@@ -8,16 +11,19 @@ def change_color(color):
 
 # Define a function to handle circle selection
 def select_led(event):
-    # Deselect all circles
-    for led in selected_leds:
-        canvas.itemconfig(led, width=1)
-
-    # Select the clicked circle
-    led_tag = canvas.gettags(event.widget)[0]   #Get the tag of the circle
-    canvas.itemconfig(event.widget, width=3)
-
-    # Add the clicked circle to the selected circles list
-    selected_leds.append(led_tag)
+    
+    #Get tag of the clicked circle
+    led_tags = canvas.gettags("current")
+    
+    print("Current LED tag: ", led_tags)
+    
+    if len(led_tags) > 0:
+        led_tag = led_tags[0]
+        canvas.itemconfig(led_tag, width = 3)
+        color = askcolor()[1]
+        canvas.itemconfig(led_tag, fill = color)
+    else:
+        print("Failed to get LED tag")
     
 def create_led(xPos, yPos):
     lRadius = 20
@@ -41,14 +47,14 @@ canvas.pack()
 canvas.create_image(0, 0, anchor="nw", image=image)
 
 # Draw circles on top of the image
-led1 = canvas.create_oval(100, 50, 150, 150, fill="green", width=1)
-led2 = canvas.create_oval(200, 200, 250, 250, fill="green", width=1)
-led3 = canvas.create_oval(300, 300, 350, 350, fill="green", width=1)
+led1 = create_led(100, 100)
+led2 = create_led(150, 150)
+led3 = create_led(200, 200)
 
 # Bind a function to the circles so that they can be selected
 canvas.tag_bind(led1, "<Button-1>", select_led)
-canvas.tag_bind(led2, "<Button-2>", select_led)
-canvas.tag_bind(led3, "<Button-3>", select_led)
+canvas.tag_bind(led2, "<Button-1>", select_led)
+canvas.tag_bind(led3, "<Button-1>", select_led)
 
 # Create a color palette
 palette = tk.Frame(root)
