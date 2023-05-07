@@ -10,6 +10,8 @@ class ImageGenerator:
         self.tooltip_text = ""
         self.file_path = "coordinates.txt"
         self.index = 0
+        
+        self.frames = 0
                 
         # Create a Tkinter window
         self.root = Tk()
@@ -28,6 +30,20 @@ class ImageGenerator:
         
         # Get canvas heigth
         self.heigth = self.canvas.winfo_height()
+        
+        #Create a frame to place on the bottom of the canvas
+        self.frame = Frame(self.root)
+        self.frame.pack(side = 'bottom')
+        
+        #create a button in the frame
+        self.buttonAddFrame = Button(self.frame, text='Add frame', command=self.add_frame )
+        self.buttonAddFrame.pack()
+        
+        self.buttonGenerateHeader = Button(self.frame, text='Generate header', command=self.generate_headerfile)        
+        self.buttonGenerateHeader.pack()
+        
+        self.buttonGenerateHeader.config(state="disabled")
+        
         
         
         # Add a binding to the canvas to show and hide the tooltip
@@ -57,15 +73,11 @@ class ImageGenerator:
             xPos = int(lineParts[1])
             yPos = int(lineParts[2])
             
-            print( "Index: " + str(index) + " xPos: " + str(xPos) + " yPos: " + str(yPos) )
+            #print( "Index: " + str(index) + " xPos: " + str(xPos) + " yPos: " + str(yPos) )
             
             self.ledLabel = self.create_led(xPos, yPos)
             
-            print( "Led label: " + str(self.ledLabel))
-                        
-            
-            
-            
+            #print( "Led label: " + str(self.ledLabel))
 
         # Start the Tkinter event loop
         self.root.mainloop()    
@@ -113,10 +125,10 @@ class ImageGenerator:
             led_tag = led_tags[0]
             self.canvas.itemconfig(led_tag, width = 3)
             color = askcolor()[1]
-            print( "Chosen color = " + color)
+            #print( "Chosen color = " + color)
             self.canvas.itemconfig(led_tag, fill = color)
         else:
-            print("Failed to get LED tag")
+            print("ERROR: Failed to get LED tag")
             
     def reset_led(self, event):
         lColor = 'Black'
@@ -130,7 +142,7 @@ class ImageGenerator:
         lColor = "Black"
         led = self.canvas.create_oval( xPos - lRadius, yPos - lRadius, xPos + lRadius, yPos + lRadius, fill = lColor )
         self.canvas.itemconfig(led, tags =(str(led), lColor))
-        print(self.canvas.gettags(led))        
+        #print(self.canvas.gettags(led))        
         self.canvas.tag_bind(led, "<Button-1>", self.select_led)
         self.canvas.tag_bind(led, "<Button-3>", self.reset_led)
         return led
@@ -168,6 +180,18 @@ class ImageGenerator:
             f.close()
             
         self.index = self.index + 1
+        
+    def add_frame(self):
+        #export colors of all leds
+        
+        #enable button when adding at leas one frame to the config
+        self.buttonGenerateHeader.config(state="active")
+        return 0
+        
+    def generate_headerfile(self):
+        #Generate header file  
+        return 0 
+    
             
                 
 if __name__ == "__main__":
