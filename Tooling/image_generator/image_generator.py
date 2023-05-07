@@ -10,14 +10,14 @@ class ImageGenerator:
         self.tooltip_text = ""
         self.file_path = "coordinates.txt"
         self.index = 0
-        
+                
         # Create a Tkinter window
         self.root = Tk()
         # Load an image using Pillow
         self.image = ImageTk.PhotoImage(file="./Disco-Neut.jpg")
         
         # Create a canvas to display the image and circles
-        self.canvas = Canvas(self.root, width=self.image.width(), height=self.image.height())
+        self.canvas = Canvas(self.root, width=self.image.width(), height=self.image.height(), name="discoNeut Pattern generator")
         self.canvas.pack()
 
         # Display the image on the canvas
@@ -37,15 +37,35 @@ class ImageGenerator:
         # Add a binding to the canvas to export coordinates on spacebar press
         self.root.bind('<space>', self.export_coordinates)
         
-        # Draw circles on top of the image
-        self.led1 = self.create_led(100, 100)
-        self.led2 = self.create_led(150, 150)
-        self.led3 = self.create_led(200, 200)
+        
+        # Draw circles on top of the image to mimic the LEDS
+        
+        #open the LEDLocation file
+        with open("LEDLocation.txt", 'r') as f:
+            linesInFile = f.readlines()
+            f.close()
+            
+        numberOfLinesInFile = len(linesInFile)
+        
+        print("Lines in file: " + str(numberOfLinesInFile))
 
-        # Bind a function to the circles so that they can be selected
-        self.canvas.tag_bind(self.led1, "<Button-1>", self.select_led)
-        self.canvas.tag_bind(self.led2, "<Button-1>", self.select_led)
-        self.canvas.tag_bind(self.led3, "<Button-1>", self.select_led)
+        for i in range(numberOfLinesInFile):
+            
+            lineContent = linesInFile[i]
+            lineParts = lineContent.split(";")   
+            index = int(lineParts[0])
+            xPos = int(lineParts[1])
+            yPos = int(lineParts[2])
+            
+            print( "Index: " + str(index) + " xPos: " + str(xPos) + " yPos: " + str(yPos) )
+            
+            self.ledLabel = self.create_led(xPos, yPos)
+            
+            print( "Led label: " + str(self.ledLabel))
+                        
+            
+            
+            
 
         # Start the Tkinter event loop
         self.root.mainloop()    
@@ -93,16 +113,26 @@ class ImageGenerator:
             led_tag = led_tags[0]
             self.canvas.itemconfig(led_tag, width = 3)
             color = askcolor()[1]
+            print( "Chosen color = " + color)
             self.canvas.itemconfig(led_tag, fill = color)
         else:
             print("Failed to get LED tag")
+            
+    def reset_led(self, event):
+        lColor = 'Black'
+        returnTag = self.canvas.gettags("current")
+        tag = returnTag[0]
+        print("LED tag: "+ str(tag))
+        self.canvas.itemconfig(tag, fill = lColor)
         
     def create_led(self, xPos, yPos):
         lRadius = 20
         lColor = "Black"
         led = self.canvas.create_oval( xPos - lRadius, yPos - lRadius, xPos + lRadius, yPos + lRadius, fill = lColor )
         self.canvas.itemconfig(led, tags =(str(led), lColor))
-        print(self.canvas.gettags(led))
+        print(self.canvas.gettags(led))        
+        self.canvas.tag_bind(led, "<Button-1>", self.select_led)
+        self.canvas.tag_bind(led, "<Button-3>", self.reset_led)
         return led
     
     # Create the coordinates file if it does not exist
@@ -114,9 +144,7 @@ class ImageGenerator:
             print("Coordinates file found, adding new coordinates")
     
     def export_coordinates(self, event):
-        
-        
-             
+                
         self.create_coordinates_file()
         
         print("export coordinates:")
