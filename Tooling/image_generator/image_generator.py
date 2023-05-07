@@ -7,6 +7,8 @@ import os
 class ImageGenerator:
     def __init__(self):
         
+        self.programVersion = 0.1
+        
         self.tooltip_text = ""
         self.file_path = "coordinates.txt"
         self.index = 0
@@ -44,6 +46,11 @@ class ImageGenerator:
         
         self.buttonGenerateHeader.config(state="disabled")
         
+        #create a console output
+        self.console = Text(self.root, height=5, bg="white", fg="black", font=("Consolas", 12))
+        self.console.pack(side="bottom", fill="both")
+        self.console.config(state="disabled")
+        
         
         
         # Add a binding to the canvas to show and hide the tooltip
@@ -78,6 +85,8 @@ class ImageGenerator:
             self.ledLabel = self.create_led(xPos, yPos)
             
             #print( "Led label: " + str(self.ledLabel))
+            
+        self.print_console("FRAME GENERATOR V" + str(self.programVersion))
 
         # Start the Tkinter event loop
         self.root.mainloop()    
@@ -191,6 +200,11 @@ class ImageGenerator:
     def generate_headerfile(self):
         #Generate header file  
         return 0 
+    
+    def print_console(self, text):
+        self.console.config(state="normal")
+        self.console.insert('end', text + "\n")
+        self.console.config(state="disabled")
     
             
                 
