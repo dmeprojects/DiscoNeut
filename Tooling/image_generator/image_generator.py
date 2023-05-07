@@ -12,8 +12,11 @@ class ImageGenerator:
         self.tooltip_text = ""
         self.file_path = "coordinates.txt"
         self.index = 0
+        self.numberOfLeds = 39
         
-        self.frames = 0
+        self.frames = 0     #stores the number of frames in the effect
+        self.frameArray = []    #stores the array with the colors of the individual leds
+        self.Effect = []    #stores the frameArrays
                 
         # Create a Tkinter window
         self.root = Tk()
@@ -140,7 +143,7 @@ class ImageGenerator:
             print("ERROR: Failed to get LED tag")
             
     def reset_led(self, event):
-        lColor = 'Black'
+        lColor = "#000000"
         returnTag = self.canvas.gettags("current")
         tag = returnTag[0]
         print("LED tag: "+ str(tag))
@@ -149,8 +152,9 @@ class ImageGenerator:
     def create_led(self, xPos, yPos):
         lRadius = 20
         lColor = "Black"
-        led = self.canvas.create_oval( xPos - lRadius, yPos - lRadius, xPos + lRadius, yPos + lRadius, fill = lColor )
-        self.canvas.itemconfig(led, tags =(str(led), lColor))
+        lFillColor = "#000000"
+        led = self.canvas.create_oval( xPos - lRadius, yPos - lRadius, xPos + lRadius, yPos + lRadius, fill = lFillColor )
+        self.canvas.itemconfig(led, tags =("led"+str(led), lColor))
         #print(self.canvas.gettags(led))        
         self.canvas.tag_bind(led, "<Button-1>", self.select_led)
         self.canvas.tag_bind(led, "<Button-3>", self.reset_led)
@@ -192,6 +196,33 @@ class ImageGenerator:
         
     def add_frame(self):
         #export colors of all leds
+        led_tags = self.canvas.find_withtag("Black")            
+        print("tags found: " + str(led_tags))
+        
+        for tag in led_tags:
+            fillColor = self.canvas.itemcget(tag, "fill")
+            print(f"Tag: {tag}; color: {fillColor}")
+            #self.print_console( (f"Tag: {tag}; color: {fillColor}"))
+            r = int(fillColor[1:3], 16)
+            g = int(fillColor[3:5], 16)
+            b = int(fillColor[5:7], 16)
+            
+            #self.print_console( f"LED:{tag};R{r};G{g};B{b}")
+            
+            self.frameArray.append([r,g,b])
+            
+        #Print array
+        self.print_console(str(self.frameArray))
+        
+        self.Effect.append(self.frameArray)
+        
+        print(" Array length = " + str(len(self.Effect)))
+        
+        self.frames = self.frames + 1
+        
+        self.print_console("Total number of frames: " + str(self.frames))        
+        
+        
         
         #enable button when adding at leas one frame to the config
         self.buttonGenerateHeader.config(state="active")
