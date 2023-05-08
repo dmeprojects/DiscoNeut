@@ -10,7 +10,11 @@
 #include "LED_DEFINES.h"
 #include "led_patterns.h"
 
-#define LED_INTENSITY   10
+//#include "rotation.h"
+#include "orange_circle.h"
+//#include "eva.h"
+
+#define LED_INTENSITY   60
 
 extern led_strip_handle_t led_strip;
 
@@ -28,7 +32,7 @@ int drawCircle ( void )
     {
         for( loops = 0; loops < sizeof(CIRCLE_LEDS); loops++)
         {
-            led_strip_set_pixel(led_strip, CIRCLE_LEDS[loops], 0, 0, LED_INTENSITY);
+            led_strip_set_pixel(led_strip, CIRCLE_LEDS[loops], 0, 2, 2);
 
             led_strip_refresh(led_strip);
 
@@ -78,4 +82,39 @@ int scrollCircle ( void )
     }
 
     return 0;
+}
+
+void readPattern (uint8_t lPattern, uint8_t lRuns, uint32_t lDelayMs)
+{
+    uint32_t lRunCounter = 0;
+    uint32_t lFrameCounter = 0;
+    int8_t lLedCounter = 39;
+    uint8_t lColorCounter = 3;
+
+    //Select pattern
+    
+    //load pattern info 
+
+    //Clear all leds
+    led_strip_clear(led_strip);
+
+    for( lRunCounter = 0; lRunCounter < lRuns; lRunCounter++)
+    {
+        //Set leds   
+        for (lFrameCounter = 0; lFrameCounter < orange_circleFrames; lFrameCounter++) //for loop number of frames
+        {
+            //for loop number of leds
+            for (lLedCounter = 0; lLedCounter < 39; lLedCounter++)
+            {
+                led_strip_set_pixel(led_strip, lLedCounter, orange_circle[lFrameCounter][lLedCounter][0], //Set R values on led
+                                                            orange_circle[lFrameCounter][lLedCounter][1], //Set G values on led
+                                                            orange_circle[lFrameCounter][lLedCounter][2]); //Set B values on led   
+
+            }
+            
+            led_strip_refresh(led_strip);
+            vTaskDelay(pdMS_TO_TICKS(lDelayMs));
+        }
+
+    }
 }

@@ -1,21 +1,44 @@
--- ccache will be used for faster recompilation
--- Building ESP-IDF components for target esp32c3
-Processing 2 dependencies:
-[1/2] espressif/led_strip (2.3.1)
-[2/2] idf (5.2.0)
--- Project sdkconfig file D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/sdkconfig
--- App "blink" version: 80fe1be-dirty
--- Adding linker script D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/esp-idf/esp_system/ld/memory.ld
--- Adding linker script D:/ESP-IDF/esp-idf/components/esp_system/ld/esp32c3/sections.ld.in
--- Adding linker script D:/ESP-IDF/esp-idf/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
--- Adding linker script D:/ESP-IDF/esp-idf/components/esp_rom/esp32c3/ld/esp32c3.rom.api.ld
--- Adding linker script D:/ESP-IDF/esp-idf/components/esp_rom/esp32c3/ld/esp32c3.rom.libgcc.ld
--- Adding linker script D:/ESP-IDF/esp-idf/components/esp_rom/esp32c3/ld/esp32c3.rom.newlib.ld
--- Adding linker script D:/ESP-IDF/esp-idf/components/esp_rom/esp32c3/ld/esp32c3.rom.version.ld
--- Adding linker script D:/ESP-IDF/esp-idf/components/esp_rom/esp32c3/ld/esp32c3.rom.eco3.ld
--- Adding linker script D:/ESP-IDF/esp-idf/components/soc/esp32c3/ld/esp32c3.peripherals.ld
--- Components: app_trace app_update bootloader bootloader_support bt cmock console cxx driver efuse esp-tls esp_adc esp_app_format esp_coex esp_common esp_eth esp_event esp_gdbstub esp_hid esp_http_client esp_http_server esp_https_ota esp_https_server esp_hw_support esp_lcd esp_local_ctrl esp_mm esp_netif esp_netif_stack esp_partition esp_phy esp_pm esp_psram esp_ringbuf esp_rom esp_system esp_timer esp_wifi espcoredump espressif__led_strip esptool_py fatfs freertos hal heap http_parser idf_test ieee802154 json log lwip main mbedtls mqtt newlib nvs_flash openthread partition_table protobuf-c protocomm pthread riscv sdmmc soc spi_flash spiffs tcp_transport ulp unity usb vfs wear_levelling wifi_provisioning wpa_supplicant
--- Component paths: D:/ESP-IDF/esp-idf/components/app_trace D:/ESP-IDF/esp-idf/components/app_update D:/ESP-IDF/esp-idf/components/bootloader D:/ESP-IDF/esp-idf/components/bootloader_support D:/ESP-IDF/esp-idf/components/bt D:/ESP-IDF/esp-idf/components/cmock D:/ESP-IDF/esp-idf/components/console D:/ESP-IDF/esp-idf/components/cxx D:/ESP-IDF/esp-idf/components/driver D:/ESP-IDF/esp-idf/components/efuse D:/ESP-IDF/esp-idf/components/esp-tls D:/ESP-IDF/esp-idf/components/esp_adc D:/ESP-IDF/esp-idf/components/esp_app_format D:/ESP-IDF/esp-idf/components/esp_coex D:/ESP-IDF/esp-idf/components/esp_common D:/ESP-IDF/esp-idf/components/esp_eth D:/ESP-IDF/esp-idf/components/esp_event D:/ESP-IDF/esp-idf/components/esp_gdbstub D:/ESP-IDF/esp-idf/components/esp_hid D:/ESP-IDF/esp-idf/components/esp_http_client D:/ESP-IDF/esp-idf/components/esp_http_server D:/ESP-IDF/esp-idf/components/esp_https_ota D:/ESP-IDF/esp-idf/components/esp_https_server D:/ESP-IDF/esp-idf/components/esp_hw_support D:/ESP-IDF/esp-idf/components/esp_lcd D:/ESP-IDF/esp-idf/components/esp_local_ctrl D:/ESP-IDF/esp-idf/components/esp_mm D:/ESP-IDF/esp-idf/components/esp_netif D:/ESP-IDF/esp-idf/components/esp_netif_stack D:/ESP-IDF/esp-idf/components/esp_partition D:/ESP-IDF/esp-idf/components/esp_phy D:/ESP-IDF/esp-idf/components/esp_pm D:/ESP-IDF/esp-idf/components/esp_psram D:/ESP-IDF/esp-idf/components/esp_ringbuf D:/ESP-IDF/esp-idf/components/esp_rom D:/ESP-IDF/esp-idf/components/esp_system D:/ESP-IDF/esp-idf/components/esp_timer D:/ESP-IDF/esp-idf/components/esp_wifi D:/ESP-IDF/esp-idf/components/espcoredump D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/managed_components/espressif__led_strip D:/ESP-IDF/esp-idf/components/esptool_py D:/ESP-IDF/esp-idf/components/fatfs D:/ESP-IDF/esp-idf/components/freertos D:/ESP-IDF/esp-idf/components/hal D:/ESP-IDF/esp-idf/components/heap D:/ESP-IDF/esp-idf/components/http_parser D:/ESP-IDF/esp-idf/components/idf_test D:/ESP-IDF/esp-idf/components/ieee802154 D:/ESP-IDF/esp-idf/components/json D:/ESP-IDF/esp-idf/components/log D:/ESP-IDF/esp-idf/components/lwip D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/main D:/ESP-IDF/esp-idf/components/mbedtls D:/ESP-IDF/esp-idf/components/mqtt D:/ESP-IDF/esp-idf/components/newlib D:/ESP-IDF/esp-idf/components/nvs_flash D:/ESP-IDF/esp-idf/components/openthread D:/ESP-IDF/esp-idf/components/partition_table D:/ESP-IDF/esp-idf/components/protobuf-c D:/ESP-IDF/esp-idf/components/protocomm D:/ESP-IDF/esp-idf/components/pthread D:/ESP-IDF/esp-idf/components/riscv D:/ESP-IDF/esp-idf/components/sdmmc D:/ESP-IDF/esp-idf/components/soc D:/ESP-IDF/esp-idf/components/spi_flash D:/ESP-IDF/esp-idf/components/spiffs D:/ESP-IDF/esp-idf/components/tcp_transport D:/ESP-IDF/esp-idf/components/ulp D:/ESP-IDF/esp-idf/components/unity D:/ESP-IDF/esp-idf/components/usb D:/ESP-IDF/esp-idf/components/vfs D:/ESP-IDF/esp-idf/components/wear_levelling D:/ESP-IDF/esp-idf/components/wifi_provisioning D:/ESP-IDF/esp-idf/components/wpa_supplicant
--- Configuring done
--- Generating done
--- Build files have been written to: D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build
+[1/5] cmd.exe /C "cd /D D:\DME-Projects_Software\DiscoNeut\Firmware\test-routines\Blink\blink\build\esp-idf\esptool_py && D:\Espressif\python_env\idf5.0_py3.11_env\Scripts\python.exe D:/Espressif/frameworks/esp-idf-v5.0.1/components/partition_table/check_sizes.py --offset 0x8000 partition --type app D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/partition_table/partition-table.bin D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/blink.bin"
+blink.bin binary size 0x319a0 bytes. Smallest app partition is 0x100000 bytes. 0xce660 bytes (81%) free.
+[2/5] Performing build step for 'bootloader'
+[1/1] cmd.exe /C "cd /D D:\DME-Projects_Software\DiscoNeut\Firmware\test-routines\Blink\blink\build\bootloader\esp-idf\esptool_py && D:\Espressif\python_env\idf5.0_py3.11_env\Scripts\python.exe D:/Espressif/frameworks/esp-idf-v5.0.1/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/bootloader/bootloader.bin"
+Bootloader binary size 0x4ee0 bytes. 0x3120 bytes (38%) free.
+[2/3] cmd.exe /C "cd /D D:\Espressif\frameworks\esp-idf-v5.0.1\components\esptool_py && D:\Espressif\tools\cmake\3.24.0\bin\cmake.exe -D IDF_PATH=D:/Espressif/frameworks/esp-idf-v5.0.1 -D SERIAL_TOOL=D:/Espressif/python_env/idf5.0_py3.11_env/Scripts/python.exe;;D:/Espressif/frameworks/esp-idf-v5.0.1/components/esptool_py/esptool/esptool.py;--chip;esp32c3 -D SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args -D WORKING_DIRECTORY=D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build -P D:/Espressif/frameworks/esp-idf-v5.0.1/components/esptool_py/run_serial_tool.cmake"
+esptool esp32c3 -p COM5 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 80m --flash_size 2MB 0x0 bootloader/bootloader.bin 0x10000 blink.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.5.1
+Serial port COM5
+Connecting....
+Chip is ESP32-C3 (revision v0.3)
+Features: WiFi, BLE
+Crystal is 40MHz
+MAC: 84:f7:03:10:77:e4
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00000000 to 0x00004fff...
+Flash will be erased from 0x00010000 to 0x00041fff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Compressed 20192 bytes to 12373...
+Writing at 0x00000000... (100 %)
+Wrote 20192 bytes (12373 compressed) at 0x00000000 in 0.6 seconds (effective 266.0 kbit/s)...
+Hash of data verified.
+Compressed 203168 bytes to 105922...
+Writing at 0x00010000... (14 %)
+Writing at 0x0001b76e... (28 %)
+Writing at 0x00021b4a... (42 %)
+Writing at 0x00029234... (57 %)
+Writing at 0x00030a0d... (71 %)
+Writing at 0x00037149... (85 %)
+Writing at 0x0003e292... (100 %)
+Wrote 203168 bytes (105922 compressed) at 0x00010000 in 3.3 seconds (effective 491.0 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 103...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (103 compressed) at 0x00008000 in 0.1 seconds (effective 304.3 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...

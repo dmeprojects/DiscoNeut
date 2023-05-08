@@ -1,4 +1,8 @@
 {
     "idf.gitPathWin": "C:\\Users\\nick_\\.espressif\\tools\\idf-git\\2.30.1\\cmd\\git.exe",
-    "idf.portWin": "COM5"
+    "idf.portWin": "COM5",
+    "files.associations": {
+        "led_strip.h": "c",
+        "eva.h": "c"
+    }
 }

@@ -298,12 +298,14 @@ void app_main(void)
         //blink_led();
 
         //leds_draw_circle();
-        drawCircle();
+        //drawCircle();
+
+        readPattern(0, 100, 100);
 
         vTaskDelay(pdMS_TO_TICKS(100));
         //run_led();
 
-        scrollCircle();
+        //scrollCircle();
 
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
