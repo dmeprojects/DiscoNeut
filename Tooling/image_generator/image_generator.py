@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import colorchooser
-from tkinter import filedialog
+from tkinter import filedialog, simpledialog
 from PIL import ImageTk
 from tkinter.colorchooser import *
 import os
@@ -249,15 +249,24 @@ class ImageGenerator:
         
         filename = filedialog.asksaveasfilename(defaultextension=".h")
         
+        if not filename:
+            return
+        
+        patternName = simpledialog.askstring("Pattern Name", "Input a custom name for the pattern:")
+        
+        if not patternName:
+            return
+        
+        
         if filename:
             with open(filename, "w") as f:
                 f.write("#ifndef FRAME_ARRAY_H\n")
                 f.write("#define FRAME_ARRAY_H\n\n")                
-                f.write("#include <stdint.h>\n\n")
-                f.write("#define NUM_FRAMES {}\n".format(len(self.EffectScaled)))
+                f.write("#include <stdint.h>\n\n")                
                 f.write("#define NUM_LEDS {}\n".format(len(self.EffectScaled[0])))
                 f.write("#define NUM_COLORS 3\n")
-                f.write("const uint8_t frameArray[NUM_FRAMES][NUM_LEDS][NUM_COLORS] = {\n")
+                f.write("const uint32_t " + patternName + "Frames = " + str(len(self.EffectScaled)) + ";\n")         
+                f.write("const uint8_t " + patternName + "[" + str(len(self.EffectScaled)) + "][NUM_LEDS][NUM_COLORS] = {\n")
                 for i, frame in enumerate(self.EffectScaled):
                     f.write("\t{\n")
                     for j, led in enumerate(frame):
