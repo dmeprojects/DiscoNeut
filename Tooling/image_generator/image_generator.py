@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import colorchooser
+from tkinter import filedialog
 from PIL import ImageTk
 from tkinter.colorchooser import *
 import os
@@ -15,8 +16,8 @@ class ImageGenerator:
         self.numberOfLeds = 39
         
         self.frames = 0     #stores the number of frames in the effect
-        self.frameArray = []    #stores the array with the colors of the individual leds
         self.Effect = []    #stores the frameArrays
+        self.EffectScaled = []  #Stores the intensity scaled effect
                 
         # Create a Tkinter window
         self.root = Tk()
@@ -195,6 +196,9 @@ class ImageGenerator:
         self.index = self.index + 1
         
     def add_frame(self):
+        
+        frameArray = []    #stores the array with the colors of the individual leds
+        frameArrayScaled = []  #stores the intensity scaled effect
         #export colors of all leds
         led_tags = self.canvas.find_withtag("Black")            
         print("tags found: " + str(led_tags))
@@ -207,14 +211,26 @@ class ImageGenerator:
             g = int(fillColor[3:5], 16)
             b = int(fillColor[5:7], 16)
             
+            rScaled = int(r * (60/255))
+            gScaled = int(g * (60/255))
+            bScaled = int(b * (60/255))
+            
             #self.print_console( f"LED:{tag};R{r};G{g};B{b}")
             
-            self.frameArray.append([r,g,b])
+            frameArray.append([r,g,b])
+            
+            frameArrayScaled.append([rScaled,gScaled,bScaled])
             
         #Print array
-        self.print_console(str(self.frameArray))
+        self.print_console("Array")
+        self.print_console(str(frameArray))
         
-        self.Effect.append(self.frameArray)
+        self.print_console("Scaled array:")
+        self.print_console(str(frameArrayScaled))
+        
+        self.Effect.append(frameArray)
+        
+        self.EffectScaled.append(frameArrayScaled)
         
         print(" Array length = " + str(len(self.Effect)))
         
@@ -230,6 +246,37 @@ class ImageGenerator:
         
     def generate_headerfile(self):
         #Generate header file  
+        
+        filename = filedialog.asksaveasfilename(defaultextension=".h")
+        
+        if filename:
+            with open(filename, "w") as f:
+                f.write("#ifndef FRAME_ARRAY_H\n")
+                f.write("#define FRAME_ARRAY_H\n\n")                
+                f.write("#include <stdint.h>\n\n")
+                f.write("#define NUM_FRAMES {}\n".format(len(self.EffectScaled)))
+                f.write("#define NUM_LEDS {}\n".format(len(self.EffectScaled[0])))
+                f.write("#define NUM_COLORS 3\n")
+                f.write("const uint8_t frameArray[NUM_FRAMES][NUM_LEDS][NUM_COLORS] = {\n")
+                for i, frame in enumerate(self.EffectScaled):
+                    f.write("\t{\n")
+                    for j, led in enumerate(frame):
+                        f.write("\t\t{")
+                        f.write(str(led[0]) + ",")
+                        f.write(str(led[1]) + ",")
+                        f.write(str(led[2]))
+                        f.write("}")
+                        if j != len(frame)-1:
+                            f.write(",")
+                        f.write("\n")
+                    f.write("\t}")
+                    if i != len(self.EffectScaled)-1:
+                        f.write(",")
+                    f.write("\n")
+                f.write("};\n\n")
+                f.write("#endif // FRAME_ARRAY_H")
+            print("Header file exported to {}".format(filename))
+
         return 0 
     
     def print_console(self, text):
