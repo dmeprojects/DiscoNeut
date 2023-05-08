@@ -46,7 +46,7 @@ static const char *TAG = "example";
 #define MIC_EN_GPIO     1
 
 /*MIC BUFFER DEFINES*/
-#define MIC_BUFFER_SIZE 64
+#define MIC_BUFFER_SIZE 128
 
 
 
@@ -220,12 +220,12 @@ void audioReceiveTask ( void* pvParams)
             ESP_LOGE("AudioSample", "failed to read channel with error code: %s", esp_err_to_name(lEspError) );
         }
 
-        ESP_LOGI("AudioSample", "Bytes read: %d", (unsigned int) bytes_read);
+        //ESP_LOGI("AudioSample", "Bytes read: %d", (unsigned int) bytes_read);
 
         // Calculate the volume of the received audio data
         float volume = get_volume(lMicData, bytes_read);
 
-        ESP_LOGE("AudioTask", "Volume: %lu", (unsigned long) volume);
+        ESP_LOGI("AudioTask", "Vol:%lu", (unsigned long) volume);
 
         // Clear the I2S buffer for the next read
         //i2s_zero_dma_buffer(I2S_NUM_0);
@@ -234,7 +234,7 @@ void audioReceiveTask ( void* pvParams)
             lMicData[i] = 0x00;
         }
         
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(pdMS_TO_TICKS(250));
     }
 }
 
@@ -266,7 +266,7 @@ BaseType_t initMicrophone ( void)
 
     lStatus = xTaskCreate( audioReceiveTask, 
                             "AudioReceiveTask",
-                            2048,
+                            4096,
                             NULL,
                             tskIDLE_PRIORITY + 2,
                             audioReceiveTaskHandle );
@@ -294,7 +294,7 @@ void app_main(void)
     ledPower(1);
 
     while (1) {
-        ESP_LOGI(TAG, "Turning the LED %s!", s_led_state == true ? "ON" : "OFF");
+        //ESP_LOGI(TAG, "Turning the LED %s!", s_led_state == true ? "ON" : "OFF");
         //blink_led();
 
         //leds_draw_circle();
@@ -302,7 +302,7 @@ void app_main(void)
 
         readPattern(0, 100, 100);
 
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(150));
         //run_led();
 
         //scrollCircle();
