@@ -9,6 +9,26 @@
     "led_strip.h": "c",
     "stdio.h": "c",
     "led_patterns.h": "c",
-    "i2s_std.h": "c"
-  }
+    "i2s_std.h": "c",
+    "algorithm": "c",
+    "random": "c"
+  },
+  "actionButtons": {
+
+    "defaultColor": "white",
+    "reloadButton": "Reload",
+    "commands": [
+        {
+            "name"  :   "Build",
+            "color" :   "white",
+            "command": "idf.py build"
+        },
+        {
+            "name": "Run",
+            "color": "white" ,
+            "command": "idf.py flash"
+        }
+    ]
+},
+"idf.flashType": "UART"
 }

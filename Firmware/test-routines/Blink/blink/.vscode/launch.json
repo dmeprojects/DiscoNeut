@@ -8,7 +8,7 @@
           "program": "${workspaceFolder}/build/bootloader/bootloader.elf",
           "args": [],
           "stopAtEntry": false,
-          "cwd": "${workspaceFolder}",
+          "cwd": "${workspaceFolder}/Firmware",
           "environment": [],
           "externalConsole": true,
           "MIMode": "gdb",

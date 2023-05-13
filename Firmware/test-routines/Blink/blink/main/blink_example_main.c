@@ -46,7 +46,7 @@ static const char *TAG = "example";
 #define MIC_EN_GPIO     1
 
 /*MIC BUFFER DEFINES*/
-#define MIC_BUFFER_SIZE 128
+#define MIC_BUFFER_SIZE 128   //Default 128
 
 
 
@@ -56,17 +56,29 @@ led_strip_handle_t led_strip;
 
 /*MIC VARIABLES*/
 // I2S configuration for ICS-43432 microphone
+/*
+    {
+        .sample_rate_hz = 16000,
+        .clk_src = I2S_CLK_SRC_DEFAULT,
+        .mclk_multiple = I2S_MCLK_MULTIPLE_384,
+
+    }
+
+    I2S_STD_CLK_DEFAULT_CONFIG(16000),   
+
+*/
 i2s_chan_handle_t rxHandle;
 i2s_chan_config_t i2s_channel_config = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_AUTO, I2S_ROLE_MASTER);
 i2s_std_config_t i2s_config = 
 {
     .clk_cfg = 
     {
-        .sample_rate_hz = 48000,
+        .sample_rate_hz = 16000,
         .clk_src = I2S_CLK_SRC_DEFAULT,
         .mclk_multiple = I2S_MCLK_MULTIPLE_384,
+
     },
-    .slot_cfg = I2S_STD_MSB_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_24BIT, I2S_SLOT_MODE_MONO),
+    .slot_cfg = I2S_STD_MSB_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_32BIT, I2S_SLOT_MODE_MONO),
     .gpio_cfg = 
     {
         .mclk = I2S_GPIO_UNUSED,
@@ -182,31 +194,122 @@ static void configure_led(void)
 }
 
 // Function to calculate the RMS amplitude of audio data
-uint32_t get_volume(uint32_t* data, size_t len)
+uint32_t get_volume(uint8_t* data, size_t len)
 {
-    int32_t sum = 0;
-    for (int i = 0; i < len / 4; i++) {
-        uint32_t sample = *((uint32_t*) &data[i * 4]);
-        sum += (uint32_t) (sample * sample);
+    uint8_t lExtraxtedSample[4] = {0};
+    uint8_t lSample = 0;
+    uint8_t lPassCounter = 0;
+    uint32_t sample = 0;
+    uint32_t shiftData = 0;
+    uint32_t mean = 0;
+    uint32_t lTempValue;
+
+    //Divide the len by 8 ( 4 bytes for each channel L & R)
+    //For example 128 bytes are 16 samples ( 8 left and 8 right)
+    uint32_t lSamplesTaken = len / 8;
+
+    //ESP_LOGI(TAG, "Samples: %d", len);
+
+    for (uint8_t firstByteCounter = 0; firstByteCounter < 64; firstByteCounter++)
+    {
+        ESP_LOGI(TAG, "Byte %d ,Value: %d ", firstByteCounter, data[firstByteCounter]);
     }
-    uint32_t rms = sqrtf(sum / (uint32_t) (len / 4));
-    return rms;
+
+
+    //Start loop
+    for (uint32_t i = 0; i < len; i+=2)
+    {
+        //Since we only have one channels ( L) we need only the even blocks (0, 2, 4, ...)
+        lTempValue = 0;
+        for ( uint8_t byteCounter = 0; byteCounter < 4; byteCounter++)
+        {
+            if( i == 0)
+            {
+                //lExtraxtedSample[byteCounter] = data[byteCounter ];
+                lSample = data[ byteCounter];
+            }
+            else
+            {
+                //lExtraxtedSample[byteCounter] = data[byteCounter + (i * 4)];
+                lSample = data[byteCounter + (i * 4)];
+            }
+            
+           
+            //lTempValue = 0;
+
+            //ESP_LOGI(TAG, "Byte %lu , %d, : %d", i, byteCounter, lExtraxtedSample[byteCounter]);
+
+            //Each 4bytes representing a 24 bit number alligned to 32 bits
+            switch (byteCounter)
+            {
+                case 0:
+                lTempValue = 0;
+                 //lTempValue += (lExtraxtedSample[byteCounter] << 24);
+                 lTempValue =+ (uint32_t)(lSample << 24);
+
+                 if(lTempValue > 0)
+                 {
+                    ESP_LOGE(TAG, "First byte must be zero: %lu", lTempValue);
+                 }
+
+                break;
+
+                case 1:
+                //lTempValue += (lExtraxtedSample[byteCounter] << 16);
+                lTempValue =+ (uint32_t)(lSample << 16);
+                break;
+
+                case 2: 
+                //lTempValue += (lExtraxtedSample[byteCounter] << 8);
+                lTempValue =+ (uint32_t)(lSample << 8);
+                break;
+
+                case 3:
+                //lTempValue += lExtraxtedSample[byteCounter] & 0xff;
+                lTempValue =+ (uint32_t)(lSample << 24);
+                break;
+            }
+
+            
+        }
+
+        //ESP_LOGI(TAG, "Sample: %lu", lTempValue);
+
+        //data is 24 bit alligned with MSB first
+        sample += lTempValue;   //Extract the fulle sample        
+    }
+    mean = (sample / 8);
+
+    return mean;
+
+
+
+
+/*     int32_t sum = 0;
+    for (int i = 0; i < len / 4; i++) {
+        int32_t sample = *((int32_t*) &data[i * 4]);
+        sum += (int32_t) (sample * sample);
+    }
+    int32_t rms = sqrtf(sum / (int32_t) (len / 4));
+    return rms; */
+
+    //int32_t samples_read;
 }
 
 void audioReceiveTask ( void* pvParams)
 {
     uint8_t lStartAudio;
     size_t bytes_read = 0;
-    float volume;
+    uint32_t volume;
     esp_err_t lEspError = ESP_FAIL;
 
-    uint32_t lMicData[MIC_BUFFER_SIZE];
+    uint8_t lMicData[MIC_BUFFER_SIZE];
 
     // Start I2S data reception
     lEspError = i2s_channel_enable(rxHandle);
     if(lEspError != ESP_OK)
     {
-        ESP_LOGE("AudioStart", "failed to enable channel with error code: %s", esp_err_to_name(lEspError));
+        ESP_LOGE(TAG, "failed to enable channel with error code: %s", esp_err_to_name(lEspError));
     }
 
     for(;;)
@@ -217,24 +320,28 @@ void audioReceiveTask ( void* pvParams)
         lEspError = i2s_channel_read(rxHandle, lMicData, MIC_BUFFER_SIZE, &bytes_read, portMAX_DELAY);
         if(lEspError != ESP_OK)
         {
-            ESP_LOGE("AudioSample", "failed to read channel with error code: %s", esp_err_to_name(lEspError) );
+            ESP_LOGE(TAG, "failed to read channel with error code: %s", esp_err_to_name(lEspError) );
+        }
+        else
+        {
+            //ESP_LOGI(TAG,"Bytes Read: %lu", (uint32_t) bytes_read);
+
+/*              for( unsigned i = 0; i < 20; i++)
+            {
+                ESP_LOGI(TAG, "Byte [%d]:%d", i, lMicData[i]);
+            }  */
         }
 
         //ESP_LOGI("AudioSample", "Bytes read: %d", (unsigned int) bytes_read);
 
         // Calculate the volume of the received audio data
-        float volume = get_volume(lMicData, bytes_read);
-
-        ESP_LOGI("AudioTask", "Vol:%lu", (unsigned long) volume);
+        volume = get_volume(lMicData, bytes_read);
+        ESP_LOGI("AudioTask", "Vol:%lu",volume);
 
         // Clear the I2S buffer for the next read
         //i2s_zero_dma_buffer(I2S_NUM_0);
-        for( uint8_t i = 0; i < MIC_BUFFER_SIZE; i++)
-        {
-            lMicData[i] = 0x00;
-        }
         
-        vTaskDelay(pdMS_TO_TICKS(250));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
@@ -249,7 +356,7 @@ BaseType_t initMicrophone ( void)
 
     gpio_set_level(MIC_EN_GPIO, 0);
 
-    vTaskDelay(pdMS_TO_TICKS(50));
+    //vTaskDelay(pdMS_TO_TICKS(50));
 
     // Initialize I2S with the microphone configuration
     lEspError = i2s_new_channel(&i2s_channel_config, NULL, &rxHandle);

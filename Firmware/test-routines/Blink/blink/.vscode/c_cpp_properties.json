@@ -2,6 +2,8 @@
     "configurations": [
         {
             "name": "ESP-IDF",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
             "compilerPath": "C:\\Users\\nick_\\.espressif\\tools\\riscv32-esp-elf\\esp-12.2.0_20230208\\riscv32-esp-elf\\bin\\riscv32-esp-elf-gcc.exe",
             "includePath": [
                 "${config:idf.espIdfPath}/components/**",
