@@ -12,7 +12,7 @@ ser = serial.Serial('COM5', 115200)
 fig = plt.figure()
 ax = fig.add_subplot(1,1,1)
 ax.set_xlim([0,200])
-ax.set_ylim([0,100000])
+ax.set_ylim([0,10000])
 line, = ax.plot([],[])
 
 # regular expression to extract volume value

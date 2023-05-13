@@ -46,7 +46,7 @@ static const char *TAG = "example";
 #define MIC_EN_GPIO     1
 
 /*MIC BUFFER DEFINES*/
-#define MIC_BUFFER_SIZE 128   //Default 128
+#define MIC_BUFFER_SIZE 64   //Default 128
 
 
 
@@ -221,15 +221,17 @@ uint32_t get_volume(uint8_t* data, size_t len)
         ESP_LOGE(TAG, "Buffer len is 0");
     }
 
-    ESP_LOGI(TAG, "Samples: %d", len);
+/*     ESP_LOGI(TAG, "Samples: %d", len);
 
     for (uint8_t firstByteCounter = 0; firstByteCounter < 32; firstByteCounter++)
     {
         ESP_LOGI(TAG, "Byte %d ,Value: %d ", firstByteCounter, data[firstByteCounter]);
-    }
+    } */
 
 
-    /*Loop troug the full buffer, but skip the odd datablocks*/
+    /*Loop troug the full buffer, but skip the odd datablocks
+        Dividing the len by 4 ( 4 bytes/sample, givses the total samples)
+    */
     for (i = 0; i < len/4; i+=2)
     {
         //Since we only have one channels ( L) we need only the even blocks (0, 2, 4, ...)
@@ -257,34 +259,20 @@ uint32_t get_volume(uint8_t* data, size_t len)
         }
 
         lTempValueSampleCounter++;
-
-        //data is 24 bit alligned with MSB first
-        //sample += lTempValue;   //Extract the fulle sample        
     }
 
-    lTempValueSampleCounter--;
+    //lTempValueSampleCounter--;
+
+    //ESP_LOGI(TAG, "TepValueSampleCounter: %d", lTempValueSampleCounter );
 
     for ( i = 0; i < lTempValueSampleCounter; i++)
     {
-        sample =+ lTempValue[i];
+        sample += lTempValue[i];
 
     }
     mean = (sample / lTempValueSampleCounter);
 
     return mean;
-
-
-
-
-/*     int32_t sum = 0;
-    for (int i = 0; i < len / 4; i++) {
-        int32_t sample = *((int32_t*) &data[i * 4]);
-        sum += (int32_t) (sample * sample);
-    }
-    int32_t rms = sqrtf(sum / (int32_t) (len / 4));
-    return rms; */
-
-    //int32_t samples_read;
 }
 
 void audioReceiveTask ( void* pvParams)
@@ -327,12 +315,12 @@ void audioReceiveTask ( void* pvParams)
 
         // Calculate the volume of the received audio data
         volume = get_volume(lMicData, bytes_read);
-        ESP_LOGI("AudioTask", "Vol:%lu",volume);
+        ESP_LOGI(" ", "Vol:%lu",volume);
 
         // Clear the I2S buffer for the next read
         //i2s_zero_dma_buffer(I2S_NUM_0);
         
-        vTaskDelay(pdMS_TO_TICKS(100));
+        //vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
