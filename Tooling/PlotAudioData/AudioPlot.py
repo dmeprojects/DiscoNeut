@@ -3,6 +3,7 @@ import re
 import matplotlib.pyplot as plt
 
 programRunning = True
+xCounter = 0
 
 # open serial port
 ser = serial.Serial('COM5', 115200)
@@ -10,8 +11,8 @@ ser = serial.Serial('COM5', 115200)
 # initialize figure
 fig = plt.figure()
 ax = fig.add_subplot(1,1,1)
-ax.set_xlim([0,100])
-ax.set_ylim([0,65535])
+ax.set_xlim([0,200])
+ax.set_ylim([0,15000])
 line, = ax.plot([],[])
 
 # regular expression to extract volume value
@@ -31,21 +32,33 @@ while programRunning:
         # plot volume value
         xdata = list(line.get_xdata())
         ydata = list(line.get_ydata())
-        xdata.append(len(xdata))
+        xdata.append(xCounter)
         ydata.append(vol)
         line.set_xdata(xdata)
         line.set_ydata(ydata)
-        plt.draw()
-        plt.pause(0.05)
+        
+        xCounter += 1    
+
         
         
     # check for user input to quit program
-    if plt.waitforbuttonpress(0.001):
+    if plt.waitforbuttonpress(0.01):
         if plt.gcf().canvas.key_press_event:
-            if plt.gcf().canvas.key_press_event.key == 'q':
+            if plt.gcf().canvas.key_press_event:
                 print("Exiting program...")
                 programRunning = False
                 break
+            
+    plt.draw()
+    plt.pause(0.05)
+    
+    if (len(xdata) > 200):
+        #xCounter = 0
+        #xdata.clear()
+        plt.clf()
 
 # close serial port
 ser.close()
+
+#close plot
+plt.close()
