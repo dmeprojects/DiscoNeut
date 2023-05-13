@@ -194,6 +194,12 @@ static void configure_led(void)
 }
 
 // Function to calculate the RMS amplitude of audio data
+/*
+    Data from the  i2s interface contains 4 bytes/ sample taken. 
+    This array contains also the data from the right channel.  Since we are only
+    interested in the left channel, we must filter this right channel out
+    The 4 bytes must be converted to a 24 bit value with a max of 0xFF FF FF FF FF FF
+*/
 uint32_t get_volume(uint8_t* data, size_t len)
 {
     uint8_t lExtraxtedSample[4] = {0};
@@ -202,83 +208,68 @@ uint32_t get_volume(uint8_t* data, size_t len)
     uint32_t sample = 0;
     uint32_t shiftData = 0;
     uint32_t mean = 0;
-    uint32_t lTempValue;
+    uint32_t lTempValue[16];
+    uint8_t lTempValueSampleCounter = 0;
+    uint32_t i;
 
     //Divide the len by 8 ( 4 bytes for each channel L & R)
     //For example 128 bytes are 16 samples ( 8 left and 8 right)
     uint32_t lSamplesTaken = len / 8;
 
-    //ESP_LOGI(TAG, "Samples: %d", len);
+    if (len < 1)
+    {
+        ESP_LOGE(TAG, "Buffer len is 0");
+    }
 
-    for (uint8_t firstByteCounter = 0; firstByteCounter < 64; firstByteCounter++)
+    ESP_LOGI(TAG, "Samples: %d", len);
+
+    for (uint8_t firstByteCounter = 0; firstByteCounter < 32; firstByteCounter++)
     {
         ESP_LOGI(TAG, "Byte %d ,Value: %d ", firstByteCounter, data[firstByteCounter]);
     }
 
 
-    //Start loop
-    for (uint32_t i = 0; i < len; i+=2)
+    /*Loop troug the full buffer, but skip the odd datablocks*/
+    for (i = 0; i < len/4; i+=2)
     {
         //Since we only have one channels ( L) we need only the even blocks (0, 2, 4, ...)
-        lTempValue = 0;
         for ( uint8_t byteCounter = 0; byteCounter < 4; byteCounter++)
         {
             if( i == 0)
             {
-                //lExtraxtedSample[byteCounter] = data[byteCounter ];
-                lSample = data[ byteCounter];
+                lExtraxtedSample[byteCounter] = data[byteCounter ];
+                //lSample = data[ byteCounter];
             }
             else
             {
-                //lExtraxtedSample[byteCounter] = data[byteCounter + (i * 4)];
-                lSample = data[byteCounter + (i * 4)];
-            }
-            
-           
-            //lTempValue = 0;
-
-            //ESP_LOGI(TAG, "Byte %lu , %d, : %d", i, byteCounter, lExtraxtedSample[byteCounter]);
-
-            //Each 4bytes representing a 24 bit number alligned to 32 bits
-            switch (byteCounter)
-            {
-                case 0:
-                lTempValue = 0;
-                 //lTempValue += (lExtraxtedSample[byteCounter] << 24);
-                 lTempValue =+ (uint32_t)(lSample << 24);
-
-                 if(lTempValue > 0)
-                 {
-                    ESP_LOGE(TAG, "First byte must be zero: %lu", lTempValue);
-                 }
-
-                break;
-
-                case 1:
-                //lTempValue += (lExtraxtedSample[byteCounter] << 16);
-                lTempValue =+ (uint32_t)(lSample << 16);
-                break;
-
-                case 2: 
-                //lTempValue += (lExtraxtedSample[byteCounter] << 8);
-                lTempValue =+ (uint32_t)(lSample << 8);
-                break;
-
-                case 3:
-                //lTempValue += lExtraxtedSample[byteCounter] & 0xff;
-                lTempValue =+ (uint32_t)(lSample << 24);
-                break;
-            }
-
-            
+                lExtraxtedSample[byteCounter] = data[byteCounter + (i * 4)];
+                //lSample = data[byteCounter + (i * 4)];
+            }            
         }
 
         //ESP_LOGI(TAG, "Sample: %lu", lTempValue);
 
+        lTempValue[lTempValueSampleCounter] = ( ( lExtraxtedSample[0] * 24)  + ( lExtraxtedSample[1] * 16 ) + ( lExtraxtedSample[2] * 8 ) + ( lExtraxtedSample[3] & 0xff ) );
+
+        if (lTempValue[lTempValueSampleCounter] > 0xffffff)
+        {
+            ESP_LOGE(TAG, "Error, value is to high for 24 bit: %lu", lTempValue[lTempValueSampleCounter]);
+        }
+
+        lTempValueSampleCounter++;
+
         //data is 24 bit alligned with MSB first
-        sample += lTempValue;   //Extract the fulle sample        
+        //sample += lTempValue;   //Extract the fulle sample        
     }
-    mean = (sample / 8);
+
+    lTempValueSampleCounter--;
+
+    for ( i = 0; i < lTempValueSampleCounter; i++)
+    {
+        sample =+ lTempValue[i];
+
+    }
+    mean = (sample / lTempValueSampleCounter);
 
     return mean;
 
