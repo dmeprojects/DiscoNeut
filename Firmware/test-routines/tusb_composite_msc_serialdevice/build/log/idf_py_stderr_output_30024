@@ -1,0 +1,13 @@
+CMake Error at D:/Espressif/frameworks/esp-idf-v5.0.1/tools/cmake/build.cmake:519 (message):
+  HINT: Component "espressif/esp_tinyusb" has suitable versions for other
+  targets: "esp32s3", "esp32s2".  Is your current target "esp32" set
+  correctly?
+
+  ERROR: Cannot find versions of "espressif/esp_tinyusb" with version
+  satisfying "^1.2" for the current target "esp32"
+
+Call Stack (most recent call first):
+  D:/Espressif/frameworks/esp-idf-v5.0.1/tools/cmake/project.cmake:440 (idf_build_process)
+  CMakeLists.txt:8 (project)
+
+

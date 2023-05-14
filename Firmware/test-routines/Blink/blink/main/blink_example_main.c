@@ -46,7 +46,7 @@ static const char *TAG = "example";
 #define MIC_EN_GPIO     1
 
 /*MIC BUFFER DEFINES*/
-#define MIC_BUFFER_SIZE 64   //Default 128
+#define MIC_BUFFER_SIZE 128   //Default 128
 
 
 
@@ -200,17 +200,19 @@ static void configure_led(void)
     interested in the left channel, we must filter this right channel out
     The 4 bytes must be converted to a 24 bit value with a max of 0xFF FF FF FF FF FF
 */
-uint32_t get_volume(uint8_t* data, size_t len)
+int32_t get_volume(uint8_t* data, size_t len)
 {
     uint8_t lExtraxtedSample[4] = {0};
     uint8_t lSample = 0;
     uint8_t lPassCounter = 0;
-    uint32_t sample = 0;
+    int32_t sample = 0;
     uint32_t shiftData = 0;
-    uint32_t mean = 0;
+    int32_t mean = 0;
     uint32_t lTempValue[16];
+    int32_t lSignedTempValue[16];
     uint8_t lTempValueSampleCounter = 0;
     uint32_t i;
+    uint8_t sign;   //0 is positive, 1 is negative
 
     //Divide the len by 8 ( 4 bytes for each channel L & R)
     //For example 128 bytes are 16 samples ( 8 left and 8 right)
@@ -249,13 +251,26 @@ uint32_t get_volume(uint8_t* data, size_t len)
             }            
         }
 
+        //Check the MSB for the sign bit
+        if( lExtraxtedSample[1] && 0x80)
+        {
+            ESP_LOGI(TAG, "- sign detected");
+            lExtraxtedSample[1] = lExtraxtedSample[1] & 0x7f;   //Set last bit to 0
+            sign = 1;
+        }
+        else
+        {
+            sign = 0;
+        }
+
         //ESP_LOGI(TAG, "Sample: %lu", lTempValue);
 
         lTempValue[lTempValueSampleCounter] = ( ( lExtraxtedSample[0] * 24)  + ( lExtraxtedSample[1] * 16 ) + ( lExtraxtedSample[2] * 8 ) + ( lExtraxtedSample[3] & 0xff ) );
 
-        if (lTempValue[lTempValueSampleCounter] > 0xffffff)
+        /*Detect the 2 complement*/
+        if (sign)
         {
-            ESP_LOGE(TAG, "Error, value is to high for 24 bit: %lu", lTempValue[lTempValueSampleCounter]);
+            lTempValue[lTempValueSampleCounter] = lTempValue[lTempValueSampleCounter] | 0x80000000; //Set highest byte to one to set the - sign
         }
 
         lTempValueSampleCounter++;
@@ -279,7 +294,7 @@ void audioReceiveTask ( void* pvParams)
 {
     uint8_t lStartAudio;
     size_t bytes_read = 0;
-    uint32_t volume;
+    int32_t volume;
     esp_err_t lEspError = ESP_FAIL;
 
     uint8_t lMicData[MIC_BUFFER_SIZE];
@@ -315,12 +330,12 @@ void audioReceiveTask ( void* pvParams)
 
         // Calculate the volume of the received audio data
         volume = get_volume(lMicData, bytes_read);
-        ESP_LOGI(" ", "Vol:%lu",volume);
+        ESP_LOGI(" ", "Vol:%ld",volume);
 
         // Clear the I2S buffer for the next read
         //i2s_zero_dma_buffer(I2S_NUM_0);
         
-        //vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(200));
     }
 }
 
