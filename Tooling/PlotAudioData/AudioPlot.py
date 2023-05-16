@@ -16,7 +16,7 @@ ax.set_ylim([0,10000])
 line, = ax.plot([],[])
 
 # regular expression to extract volume value
-vol_regex = re.compile(r'Vol:(\d+)')
+vol_regex = re.compile(r'VOL:(\d+)')
 
 # loop to read data and plot volume values
 while programRunning:
@@ -28,6 +28,7 @@ while programRunning:
     if match:
         vol = int(match.group(1))
         print(f"Volume: {vol}")
+        print(f"Volume Hex: {hex(vol)}")
 
         # plot volume value
         xdata = list(line.get_xdata())

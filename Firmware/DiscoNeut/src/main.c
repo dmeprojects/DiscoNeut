@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "inttypes.h"
+
 /*Freertos libraries*/
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -34,10 +36,9 @@ static const char *TAG = "main";
 #define MIC_EN_GPIO     1
 
 /*MIC BUFFER DEFINES*/
-#define MIC_BUFFER_SIZE 128   //Default 128
+#define MIC_BUFFER_SIZE 256   //Default 128
 
 /*LED VARIABLES*/
-static uint8_t s_led_state = 0;
 led_strip_handle_t led_strip;
 
 /*MIC VARIABLES*/
@@ -162,17 +163,18 @@ static void configure_led(void)
 */
 int32_t get_volume(uint8_t* data, size_t len)
 {
-    uint8_t lExtraxtedSample[4] = {0};
-    uint8_t lSample = 0;
-    uint8_t lPassCounter = 0;
-    int32_t sample = 0;
-    uint32_t shiftData = 0;
-    int32_t mean = 0;
-    uint32_t lTempValue[16];
-    int32_t lSignedTempValue[16];
+    uint8_t lExtraxtedSample[4] = {0};  //# of incomming bytes
     uint8_t lTempValueSampleCounter = 0;
+    //int32_t lVolume = 0;    
     uint32_t i;
-    uint8_t sign;   //0 is positive, 1 is negative
+
+    int32_t lTempValue[len/8];
+    int32_t lSquaredSample[len/8];
+    int64_t lSumSquared = 0;
+
+    int32_t lvolume;
+    float lMeanSquared;
+    int32_t rmsValue;
 
     //Divide the len by 8 ( 4 bytes for each channel L & R)
     //For example 128 bytes are 16 samples ( 8 left and 8 right)
@@ -181,15 +183,8 @@ int32_t get_volume(uint8_t* data, size_t len)
     if (len < 1)
     {
         ESP_LOGE(TAG, "Buffer len is 0");
+        return 0;
     }
-
-/*     ESP_LOGI(TAG, "Samples: %d", len);
-
-    for (uint8_t firstByteCounter = 0; firstByteCounter < 32; firstByteCounter++)
-    {
-        ESP_LOGI(TAG, "Byte %d ,Value: %d ", firstByteCounter, data[firstByteCounter]);
-    } */
-
 
     /*Loop troug the full buffer, but skip the odd datablocks
         Dividing the len by 4 ( 4 bytes/sample, givses the total samples)
@@ -211,48 +206,46 @@ int32_t get_volume(uint8_t* data, size_t len)
             }            
         }
 
-        //Check the MSB for the sign bit
-        if( lExtraxtedSample[1] && 0x80)
-        {
-            ESP_LOGI(TAG, "- sign detected");
-            lExtraxtedSample[1] = lExtraxtedSample[1] & 0x7f;   //Set last bit to 0
-            sign = 1;
-        }
-        else
-        {
-            sign = 0;
-        }
-
-        //ESP_LOGI(TAG, "Sample: %lu", lTempValue);
-
-        lTempValue[lTempValueSampleCounter] = ( ( lExtraxtedSample[0] * 24)  + ( lExtraxtedSample[1] * 16 ) + ( lExtraxtedSample[2] * 8 ) + ( lExtraxtedSample[3] & 0xff ) );
+        //Convert the individual bytes to a uint32_t
+        lTempValue[lTempValueSampleCounter] = ( (uint32_t)( lExtraxtedSample[1] << 16 ) | (uint32_t)( lExtraxtedSample[2] << 8 ) | ( lExtraxtedSample[3] & 0xff ) );
 
         /*Detect the 2 complement*/
-        if (sign)
+        if (lTempValue[lTempValueSampleCounter] & 0x00800000)
         {
-            lTempValue[lTempValueSampleCounter] = lTempValue[lTempValueSampleCounter] | 0x80000000; //Set highest byte to one to set the - sign
+            lTempValue[lTempValueSampleCounter] |= 0xFF000000; //Set highest byte to one to set the - sign
+            lTempValue[lTempValueSampleCounter] &= 0xFF7FFFFF; //Clear the third byte
         }
 
         lTempValueSampleCounter++;
     }
 
-    //lTempValueSampleCounter--;
-
-    //ESP_LOGI(TAG, "TepValueSampleCounter: %d", lTempValueSampleCounter );
-
+    //Square each value
     for ( i = 0; i < lTempValueSampleCounter; i++)
     {
-        sample += lTempValue[i];
-
+        lSquaredSample[i] = lTempValue[i] * lTempValue[i] ;
     }
-    mean = (sample / lTempValueSampleCounter);
 
-    return mean;
+    //Calculate sum of Squared values
+    for( i = 0; i < lTempValueSampleCounter; i++)
+    {
+        lSumSquared += lSquaredSample[i];
+    }
+
+    lMeanSquared = (float)(lSumSquared) / lSamplesTaken;
+
+    lvolume = (int32_t)sqrt( lMeanSquared);
+
+    if( lvolume > 0xFFFF000)
+    {
+        lvolume = 0;
+    }
+
+    return lvolume;
 }
 
 void audioReceiveTask ( void* pvParams)
 {
-    uint8_t lStartAudio;
+    //uint8_t lStartAudio;
     size_t bytes_read = 0;
     int32_t volume;
     esp_err_t lEspError = ESP_FAIL;
@@ -290,7 +283,7 @@ void audioReceiveTask ( void* pvParams)
 
         // Calculate the volume of the received audio data
         volume = get_volume(lMicData, bytes_read);
-        ESP_LOGI(" ", "Vol:%ld",volume);
+        ESP_LOGI(TAG, "VOL:%li", volume);
 
         // Clear the I2S buffer for the next read
         //i2s_zero_dma_buffer(I2S_NUM_0);
@@ -342,7 +335,7 @@ BaseType_t initMicrophone ( void)
 
 void app_main() 
 {
-        uint8_t loopCounter = 0;
+    uint8_t loopCounter = 0;
 
     /* Configure the peripheral according to the LED type */
     configure_led();

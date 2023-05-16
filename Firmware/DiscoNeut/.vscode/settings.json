@@ -3,6 +3,8 @@
     "files.associations": {
         "led_patterns.h": "c",
         "esp_log.h": "c",
-        "i2s_std.h": "c"
+        "i2s_std.h": "c",
+        "stdio.h": "c",
+        "inttypes.h": "c"
     }
 }
