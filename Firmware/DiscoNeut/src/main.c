@@ -36,7 +36,7 @@ static const char *TAG = "main";
 #define MIC_EN_GPIO     1
 
 /*MIC BUFFER DEFINES*/
-#define MIC_BUFFER_SIZE 256   //Default 128
+#define MIC_BUFFER_SIZE 64   //Default 128
 
 /*LED VARIABLES*/
 led_strip_handle_t led_strip;
@@ -48,13 +48,25 @@ i2s_std_config_t i2s_config =
 {
     .clk_cfg = 
     {
-        .sample_rate_hz = 16000,
+        .sample_rate_hz = 44100,
         .clk_src = I2S_CLK_SRC_DEFAULT,
         .mclk_multiple = I2S_MCLK_MULTIPLE_384,
 
     },
-    .slot_cfg = I2S_STD_MSB_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_32BIT, I2S_SLOT_MODE_MONO),
-    .gpio_cfg = 
+    .slot_cfg = 
+    {
+        .data_bit_width = I2S_DATA_BIT_WIDTH_24BIT,
+        .slot_bit_width = I2S_SLOT_BIT_WIDTH_AUTO,
+        .slot_mode = I2S_SLOT_MODE_MONO,
+        .slot_mask = I2S_STD_SLOT_LEFT,
+        .ws_width = I2S_DATA_BIT_WIDTH_32BIT,
+        .ws_pol = false, 
+        .bit_shift = false, 
+        .left_align = false, 
+        .big_endian = false, 
+        .bit_order_lsb = false, 
+    },
+    .gpio_cfg =
     {
         .mclk = I2S_GPIO_UNUSED,
         .bclk = MIC_CLK_GPIO,
@@ -168,10 +180,12 @@ int32_t get_volume(uint8_t* data, size_t len)
     //int32_t lVolume = 0;    
     uint32_t i;
 
-    int32_t lTempValue[len/8];
-    int32_t lSquaredSample[len/8];
+    uint32_t lTempValue[len/8];
+
+    int64_t lSquaredSample[len/8];
     int64_t lSumSquared = 0;
 
+    int32_t lTempIntValue = 0;
     int32_t lvolume;
     float lMeanSquared;
     int32_t rmsValue;
@@ -206,23 +220,30 @@ int32_t get_volume(uint8_t* data, size_t len)
             }            
         }
 
+        lTempValue[lTempValueSampleCounter] = 0;
+
         //Convert the individual bytes to a uint32_t
-        lTempValue[lTempValueSampleCounter] = ( (uint32_t)( lExtraxtedSample[1] << 16 ) | (uint32_t)( lExtraxtedSample[2] << 8 ) | ( lExtraxtedSample[3] & 0xff ) );
+        lTempValue[lTempValueSampleCounter] = ( (uint32_t)( lExtraxtedSample[1] << 16 ) | (uint32_t)( lExtraxtedSample[2] << 8 ) | ( lExtraxtedSample[3] ) );
 
         /*Detect the 2 complement*/
-        if (lTempValue[lTempValueSampleCounter] & 0x00800000)
+        if (lTempValue[lTempValueSampleCounter] > 0x00800000)
         {
-            lTempValue[lTempValueSampleCounter] |= 0xFF000000; //Set highest byte to one to set the - sign
-            lTempValue[lTempValueSampleCounter] &= 0xFF7FFFFF; //Clear the third byte
-        }
+            //lTempValue[lTempValueSampleCounter] |= 0xFF800000; //Set highest byte to one to set the - sign
 
+            //Invert all the bits
+            lTempValue[lTempValueSampleCounter] = ~lTempValue[lTempValueSampleCounter];
+
+            //Add one to it
+            lTempValue[lTempValueSampleCounter]++; 
+        }
         lTempValueSampleCounter++;
     }
 
     //Square each value
     for ( i = 0; i < lTempValueSampleCounter; i++)
     {
-        lSquaredSample[i] = lTempValue[i] * lTempValue[i] ;
+        lTempIntValue = lTempValue[i];
+         lSquaredSample[i] = lTempIntValue * lTempIntValue ;
     }
 
     //Calculate sum of Squared values
@@ -250,7 +271,7 @@ void audioReceiveTask ( void* pvParams)
     int32_t volume;
     esp_err_t lEspError = ESP_FAIL;
 
-    uint8_t lMicData[MIC_BUFFER_SIZE];
+    int32_t lMicData[MIC_BUFFER_SIZE];
 
     // Start I2S data reception
     lEspError = i2s_channel_enable(rxHandle);
@@ -272,6 +293,7 @@ void audioReceiveTask ( void* pvParams)
         else
         {
             //ESP_LOGI(TAG,"Bytes Read: %lu", (uint32_t) bytes_read);
+            ESP_LOGI(TAG,"%li", lMicData[0]);
 
 /*              for( unsigned i = 0; i < 20; i++)
             {
@@ -282,13 +304,13 @@ void audioReceiveTask ( void* pvParams)
         //ESP_LOGI("AudioSample", "Bytes read: %d", (unsigned int) bytes_read);
 
         // Calculate the volume of the received audio data
-        volume = get_volume(lMicData, bytes_read);
-        ESP_LOGI(TAG, "VOL:%li", volume);
+        //volume = get_volume(lMicData, bytes_read);
+        //ESP_LOGI(TAG, "VOL:%li", volume);
 
         // Clear the I2S buffer for the next read
         //i2s_zero_dma_buffer(I2S_NUM_0);
         
-        vTaskDelay(pdMS_TO_TICKS(200));
+        vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
 
