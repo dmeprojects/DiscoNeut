@@ -173,105 +173,35 @@ static void configure_led(void)
     interested in the left channel, we must filter this right channel out
     The 4 bytes must be converted to a 24 bit value with a max of 0xFF FF FF FF FF FF
 */
-int32_t get_volume(uint8_t* data, size_t len)
+int16_t get_volume(int16_t* data, size_t len)
 {
-    uint8_t lExtraxtedSample[4] = {0};  //# of incomming bytes
-    uint8_t lTempValueSampleCounter = 0;
-    //int32_t lVolume = 0;    
-    uint32_t i;
+    uint32_t lSampleCount = len / (sizeof(uint16_t));
+    uint32_t lSampleCounter;
 
-    uint32_t lTempValue[len/8];
-
-    int64_t lSquaredSample[len/8];
     int64_t lSumSquared = 0;
+    int64_t lSquaredSample = 0;
 
-    int32_t lTempIntValue = 0;
-    int32_t lvolume;
-    float lMeanSquared;
-    int32_t rmsValue;
-
-    //Divide the len by 8 ( 4 bytes for each channel L & R)
-    //For example 128 bytes are 16 samples ( 8 left and 8 right)
-    uint32_t lSamplesTaken = len / 8;
-
-    if (len < 1)
+    for( lSampleCounter = 0; lSampleCounter < lSampleCount; lSampleCounter++)
     {
-        ESP_LOGE(TAG, "Buffer len is 0");
-        return 0;
+        lSquaredSample = data[lSampleCounter] * data[lSampleCounter];
+
+        lSumSquared += lSquaredSample;
     }
 
-    /*Loop troug the full buffer, but skip the odd datablocks
-        Dividing the len by 4 ( 4 bytes/sample, givses the total samples)
-    */
-    for (i = 0; i < len/4; i+=2)
-    {
-        //Since we only have one channels ( L) we need only the even blocks (0, 2, 4, ...)
-        for ( uint8_t byteCounter = 0; byteCounter < 4; byteCounter++)
-        {
-            if( i == 0)
-            {
-                lExtraxtedSample[byteCounter] = data[byteCounter ];
-                //lSample = data[ byteCounter];
-            }
-            else
-            {
-                lExtraxtedSample[byteCounter] = data[byteCounter + (i * 4)];
-                //lSample = data[byteCounter + (i * 4)];
-            }            
-        }
+    //Calculate rms
+    int16_t lRmsValue = (int16_t)(sqrt(lSumSquared / lSampleCount));
 
-        lTempValue[lTempValueSampleCounter] = 0;
-
-        //Convert the individual bytes to a uint32_t
-        lTempValue[lTempValueSampleCounter] = ( (uint32_t)( lExtraxtedSample[1] << 16 ) | (uint32_t)( lExtraxtedSample[2] << 8 ) | ( lExtraxtedSample[3] ) );
-
-        /*Detect the 2 complement*/
-        if (lTempValue[lTempValueSampleCounter] > 0x00800000)
-        {
-            //lTempValue[lTempValueSampleCounter] |= 0xFF800000; //Set highest byte to one to set the - sign
-
-            //Invert all the bits
-            lTempValue[lTempValueSampleCounter] = ~lTempValue[lTempValueSampleCounter];
-
-            //Add one to it
-            lTempValue[lTempValueSampleCounter]++; 
-        }
-        lTempValueSampleCounter++;
-    }
-
-    //Square each value
-    for ( i = 0; i < lTempValueSampleCounter; i++)
-    {
-        lTempIntValue = lTempValue[i];
-         lSquaredSample[i] = lTempIntValue * lTempIntValue ;
-    }
-
-    //Calculate sum of Squared values
-    for( i = 0; i < lTempValueSampleCounter; i++)
-    {
-        lSumSquared += lSquaredSample[i];
-    }
-
-    lMeanSquared = (float)(lSumSquared) / lSamplesTaken;
-
-    lvolume = (int32_t)sqrt( lMeanSquared);
-
-    if( lvolume > 0xFFFF000)
-    {
-        lvolume = 0;
-    }
-
-    return lvolume;
+    return lRmsValue;
 }
 
 void audioReceiveTask ( void* pvParams)
 {
     //uint8_t lStartAudio;
     size_t bytes_read = 0;
-    int32_t volume;
+    int16_t volume;
     esp_err_t lEspError = ESP_FAIL;
 
-    int32_t lMicData[MIC_BUFFER_SIZE];
+    int16_t lMicData[MIC_BUFFER_SIZE];
 
     // Start I2S data reception
     lEspError = i2s_channel_enable(rxHandle);
@@ -293,19 +223,14 @@ void audioReceiveTask ( void* pvParams)
         else
         {
             //ESP_LOGI(TAG,"Bytes Read: %lu", (uint32_t) bytes_read);
-            ESP_LOGI(TAG,"%li", lMicData[0]);
-
-/*              for( unsigned i = 0; i < 20; i++)
-            {
-                ESP_LOGI(TAG, "Byte [%d]:%d", i, lMicData[i]);
-            }  */
+            //ESP_LOGI(TAG,"%li", lMicData[0]);
         }
 
         //ESP_LOGI("AudioSample", "Bytes read: %d", (unsigned int) bytes_read);
 
         // Calculate the volume of the received audio data
-        //volume = get_volume(lMicData, bytes_read);
-        //ESP_LOGI(TAG, "VOL:%li", volume);
+        volume = get_volume(lMicData, bytes_read);
+        ESP_LOGI(TAG, "VOL:%d", volume);
 
         // Clear the I2S buffer for the next read
         //i2s_zero_dma_buffer(I2S_NUM_0);
