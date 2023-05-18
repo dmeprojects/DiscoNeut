@@ -332,7 +332,7 @@ void app_main()
 
     /* Configure the peripheral according to the LED type */
     configure_led();
-    
+
     initLedPower();
 
 
@@ -367,7 +367,7 @@ void app_main()
         
         for(i = 0; i < 11; i++)
         {
-            drawVuBar(i);
+            drawVuBar((uint32_t)i);
 
             vTaskDelay(pdMS_TO_TICKS(500));
         }

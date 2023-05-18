@@ -147,7 +147,7 @@ void drawVuBar ( uint32_t BarHeigth)
 {
 
     //uint8_t LED[MAX_BAR_HEIGTH] = {0};      //Contains the status of the leds
-    uint8_t led[MAX_BAR_HEIGTH][3];    //First byte contains if the led is on or of, the other 3 bytes contain the LED color value
+    uint8_t led[TOTAL_LEDS][3];    //First byte contains if the led is on or of, the other 3 bytes contain the LED color value
     uint8_t ledCounter = 0;
     uint8_t ledGreen = 0;
     uint8_t ledRed = 0;
@@ -163,7 +163,7 @@ void drawVuBar ( uint32_t BarHeigth)
         BarHeigth = MAX_BAR_HEIGTH;
     }
 
-    //led_strip_clear(led_strip);
+    led_strip_clear(led_strip);
 
     //first turn all leds off
     for(ledCounter = 0; ledCounter <= TOTAL_LEDS; ledCounter++)
@@ -289,13 +289,12 @@ void drawVuBar ( uint32_t BarHeigth)
                 break;
             }
         }
+
+        for (ledCounter = 0; ledCounter <= TOTAL_LEDS; ledCounter++)
+        {
+            led_strip_set_pixel(led_strip, ledCounter, led[ledCounter][0], led[ledCounter][1], led[ledCounter][2]);
+        }
+
+        led_strip_refresh(led_strip);
     }
-
-    for (ledCounter = 0; ledCounter <= TOTAL_LEDS; ledCounter++)
-    {
-        led_strip_set_pixel(led_strip, ledCounter, led[ledCounter][0], led[ledCounter][1], led[ledCounter][2]);
-    }
-
-    led_strip_refresh(led_strip);
-
 }
