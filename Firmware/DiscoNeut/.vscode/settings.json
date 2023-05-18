@@ -6,7 +6,9 @@
         "i2s_std.h": "c",
         "stdio.h": "c",
         "inttypes.h": "c",
-        "sdkconfig.h": "c"
+        "sdkconfig.h": "c",
+        "err.h": "c",
+        "esp_wifi.h": "c"
     },
     "cmake.configureOnOpen": false,
     "idf.adapterTargetName": "esp32"

@@ -1,3 +1,9 @@
 # ninja log v5
-0	368368	0	CMakeFiles/menuconfig	38f6ce07e7325dc1
-0	368368	0	D:/DME-Projects_Software/DiscoNeut/Firmware/DiscoNeut/build/CMakeFiles/menuconfig	38f6ce07e7325dc1
+0	27660	0	CMakeFiles/menuconfig	38f6ce07e7325dc1
+0	27660	0	D:/DME-Projects_Software/DiscoNeut/Firmware/DiscoNeut/build/CMakeFiles/menuconfig	38f6ce07e7325dc1
+1	4626	7061545067554992	build.ninja	5478c7c99d3f3000
+1	4650	7061545067554992	build.ninja	5478c7c99d3f3000
+0	123	7061545068654123	partition_table/partition-table.bin	846a4aaded902096
+0	123	7061545068654123	D:/DME-Projects_Software/DiscoNeut/Firmware/DiscoNeut/build/partition_table/partition-table.bin	846a4aaded902096
+123	206	0	esp-idf/partition_table/CMakeFiles/partition-table	900633e579178452
+123	206	0	D:/DME-Projects_Software/DiscoNeut/Firmware/DiscoNeut/build/esp-idf/partition_table/CMakeFiles/partition-table	900633e579178452
