@@ -257,7 +257,7 @@ void audioReceiveTask ( void* pvParams)
         }
         led_strip_refresh(led_strip); */
         
-        drawVuBar ( lHeigth);
+        //drawVuBar ( lHeigth);
 
         //Save volume to samples
         lVolArray[lVolArrayCounter] = volume;
@@ -328,19 +328,26 @@ void app_main()
 {
     BaseType_t lStatus = pdFALSE;
     uint8_t loopCounter = 0;
+    uint8_t i = 0;
 
     /* Configure the peripheral according to the LED type */
     configure_led();
+    
     initLedPower();
+
 
     /*configure input button*/
 
     /*Init I2S interface*/
     initMicrophone();
 
+    led_strip_clear(led_strip);
+
     ledPower(1);
 
-    //Create audio task
+    
+
+/*     //Create audio task
     lStatus = xTaskCreate( audioReceiveTask, 
                         "AudioReceiveTask",
                         4096,
@@ -352,7 +359,22 @@ void app_main()
         ESP_LOGE("AudioTask", "Failed to create audio task");
     }
 
+    vTaskSuspend(audioReceiveTaskHandle); */
+
+
+
     while (1) {
+        
+        for(i = 0; i < 11; i++)
+        {
+            drawVuBar(i);
+
+            vTaskDelay(pdMS_TO_TICKS(500));
+        }
+
+        led_strip_clear(led_strip);
+
+        vTaskDelay(pdMS_TO_TICKS(500));
 
         //Read button
         //ESP_LOGI(TAG, "Turning the LED %s!", s_led_state == true ? "ON" : "OFF");

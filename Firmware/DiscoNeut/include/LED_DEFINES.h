@@ -7,12 +7,14 @@
 
 static uint8_t UPPER_CENTER_LED = 7;
 static uint8_t CENTER_LED = 20;
-static uint8_t UPPER_CENTER_LED = 33;
+static uint8_t LOWER_CENTER_LED = 33;
 
 /*Circle array
 LED: 7 - 8 - 18 - 34 - 33 - 32 - 21 - 6
 */
 static uint8_t CIRCLE_LEDS[] = {6, 7, 17, 33, 32, 31, 21, 5};
+
+static uint8_t QUARTER_CIRCLE_LEDS[] = {6, 8, 32, 34};
 
 /*Upper line
 LED: 1 - 13
