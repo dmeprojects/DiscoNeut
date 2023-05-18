@@ -1,5 +1,0 @@
-[1/4] cmd.exe /C "cd /D D:\DME-Projects_Software\DiscoNeut\Firmware\test-routines\Blink\blink\build\esp-idf\esptool_py && D:\Espressif\python_env\idf5.0_py3.11_env\Scripts\python.exe D:/Espressif/frameworks/esp-idf-v5.0.1/components/partition_table/check_sizes.py --offset 0x8000 partition --type app D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/partition_table/partition-table.bin D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/blink.bin"
-blink.bin binary size 0x318e0 bytes. Smallest app partition is 0x100000 bytes. 0xce720 bytes (81%) free.
-[2/4] Performing build step for 'bootloader'
-[1/1] cmd.exe /C "cd /D D:\DME-Projects_Software\DiscoNeut\Firmware\test-routines\Blink\blink\build\bootloader\esp-idf\esptool_py && D:\Espressif\python_env\idf5.0_py3.11_env\Scripts\python.exe D:/Espressif/frameworks/esp-idf-v5.0.1/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/blink/build/bootloader/bootloader.bin"
-Bootloader binary size 0x4ee0 bytes. 0x3120 bytes (38%) free.
