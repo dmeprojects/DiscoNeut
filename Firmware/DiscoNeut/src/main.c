@@ -7,6 +7,8 @@
 /*Freertos libraries*/
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/queue.h"
+
 
 /*ESP-IDF libraries*/
 #include "esp_log.h"
@@ -55,7 +57,6 @@ i2s_std_config_t i2s_config =
         .sample_rate_hz = 16000,
         .clk_src = I2S_CLK_SRC_DEFAULT,
         .mclk_multiple = I2S_MCLK_MULTIPLE_128,
-
     },
     .slot_cfg = 
     {
@@ -170,61 +171,6 @@ static void configure_led(void)
     led_strip_clear(led_strip);
 }
 
-// Function to calculate the RMS amplitude of audio data
-/*
-    Data from the  i2s interface contains 4 bytes/ sample taken. 
-    This array contains also the data from the right channel.  Since we are only
-    interested in the left channel, we must filter this right channel out
-    The 4 bytes must be converted to a 24 bit value with a max of 0xFF FF FF FF FF FF
-*/
-uint32_t get_volume(int32_t* data, size_t len)
-{
-    uint32_t lSamples = len / (sizeof(int32_t));
-    uint32_t lSampleCounter;
-
-    uint16_t lSample;
-
-    uint64_t lSampleTotal = 0;
-    uint64_t lSampleAverage = 0;
-
-    //int64_t lSumSquared = 0;
-    //int64_t lSquaredSample = 0;
-
-/*     for( lSampleCounter = 0; lSampleCounter < lSampleCount; lSampleCounter++)
-    {
-        lSquaredSample = data[lSampleCounter] * data[lSampleCounter];
-
-        lSumSquared += lSquaredSample;
-    }
-
-    //Calculate rms
-    int16_t lRmsValue = (int16_t)(sqrt(lSumSquared / lSampleCount));
-
-    return lRmsValue; */
-
-    //Calculate average
-    //average is sum of all samples / total of samples
-
-    for (lSampleCounter = 0; lSampleCounter < lSamples; lSampleCounter++)
-    {
-        lSample = abs(data[lSampleCounter]);
-
-/*         if (lSample == 32767)
-        {
-            lSample = 0;
-        } */
-
-        lSampleTotal =+ lSample;
-
-    }
-
-    lSampleTotal = lSampleTotal  / lSamples;
-
-    return (uint32_t)lSampleTotal;
-
-
-}
-
 void audioReceiveTask ( void* pvParams)
 {
     //I2S audio variables
@@ -240,22 +186,10 @@ void audioReceiveTask ( void* pvParams)
     uint32_t lLevel = 0;
     uint32_t lMinLevel = 0, lMaxLevel = 0;
     uint32_t lMaxLevelAvg = 0, lMinlevelAvg = 0;
-    
-    uint32_t volume;
-    uint32_t absVolume;
-    //uint32_t lSample = 0;
-
-    uint8_t lDivide = 3;
-    
-    uint8_t i;   
-
-    
-    uint8_t lLedCounter;
-
-    
+ 
+    uint8_t i;       
+    uint8_t lLedCounter;    
     uint8_t lVolArrayCounter = 0;
-
-    int16_t *pMicData = &lMicData;
 
     // Start I2S data reception
     lEspError = i2s_channel_enable(rxHandle);
@@ -275,11 +209,6 @@ void audioReceiveTask ( void* pvParams)
             ESP_LOGE(TAG, "failed to read channel with error code: %s", esp_err_to_name(lEspError) );
         }
 
-        //volume = get_volume(lMicData, bytes_read);
-        //ESP_LOGI(TAG, "VOL:%d", volume);
-
-        //volume = ( (lMicData[1] + lMicData[2] + lMicData[3] + lMicData[4]) / 4); //We work for this test with the third sample
-
         //Used for 8 bit buffer
         //uint32_t lTempData = lMicData[0] << 24 | lMicData[1] << 16 | lMicData[0] << 8 | lMicData[0];
         //Used for 32 bit buffer
@@ -296,35 +225,21 @@ void audioReceiveTask ( void* pvParams)
             volume = volume & 0x00FFFFFF;
         }
 
-        //ESP_LOGI(TAG, "Volume:%d", absVolume); 
-
         //Remove noise
         volume = (volume <= NOISELEVEL) ? 0: (volume - NOISELEVEL);        
 
-
         //Smooth level
-        lLevel = ((lLevel * 7) + volume) >> lDivide;
+        lLevel = ((lLevel * 7) + volume) >> 3;
 
+        //Calculate LED heigth ( TODO: optimize function)
         uint32_t lDivider = (lMaxLevelAvg - lMinlevelAvg);
         uint32_t lTeller = (lLevel - lMinlevelAvg);
-
         float tempResult = (float)(lTeller) / (float)(lDivider);
-
         tempResult = (TOTALLEDS + 2) * tempResult;
-
-        //Calculate LED heigth
-        //lHeigth = (TOTALLEDS + 2) * (uint16_t)tempResult;
-
         lHeigth = (uint16_t)tempResult;
 
-        //ESP_LOGI(TAG, "Heigth:%d", lHeigth); 
-
         //Clip top
-        if (lHeigth < 0)
-        {
-            lHeigth = 0;
-        }
-        else if (lHeigth > TOTALLEDS + 2)
+        if (lHeigth > TOTALLEDS + 2)
         {
             lHeigth = TOTALLEDS + 2;
         }
@@ -373,14 +288,15 @@ void audioReceiveTask ( void* pvParams)
         //Calculate averages
         lMinlevelAvg = ( lMinlevelAvg * 63 + lMinLevel) >> 6;
         lMaxLevelAvg = ( lMaxLevel * 63 + lMaxLevel) >> 6;
-        
+
+        //No delay needed for now.  This can be implemented to make the visualisation more lazy    
         //vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
 BaseType_t initMicrophone ( void)
 {
-    BaseType_t lStatus = pdFALSE;
+    BaseType_t lStatus = pdTRUE;
     esp_err_t lEspError = ESP_FAIL;
 
     // Set microphone EN low (to enable mono)
@@ -396,43 +312,49 @@ BaseType_t initMicrophone ( void)
     if(lEspError != ESP_OK)
     {
         ESP_LOGE("AudioInit", "failed to add channel with error code: %s", esp_err_to_name(lEspError));
+        lStatus = pdFALSE;
     }
 
     lEspError = i2s_channel_init_std_mode(rxHandle, &i2s_config);
         if(lEspError != ESP_OK)
     {
         ESP_LOGE("AudioInit", "failed to init channel with error code: %s", esp_err_to_name(lEspError));
+        lStatus = pdFALSE;
     }
-
-    lStatus = xTaskCreate( audioReceiveTask, 
-                            "AudioReceiveTask",
-                            4096,
-                            NULL,
-                            tskIDLE_PRIORITY + 2,
-                            audioReceiveTaskHandle );
-
-    if( lStatus == pdFALSE)
-    {
-        ESP_LOGE("AudioTask", "Failed to create audio task");
-    }
-
     return lStatus;
 }
 
 void app_main() 
 {
+    BaseType_t lStatus = pdFALSE;
     uint8_t loopCounter = 0;
 
     /* Configure the peripheral according to the LED type */
     configure_led();
     initLedPower();
 
+    /*configure input button*/
+
     /*Init I2S interface*/
     initMicrophone();
 
     ledPower(1);
 
+    //Create audio task
+    lStatus = xTaskCreate( audioReceiveTask, 
+                        "AudioReceiveTask",
+                        4096,
+                        NULL,
+                        tskIDLE_PRIORITY + 2,
+                        audioReceiveTaskHandle );
+    if( lStatus == pdFALSE)
+    {
+        ESP_LOGE("AudioTask", "Failed to create audio task");
+    }
+
     while (1) {
+
+        //Read button
         //ESP_LOGI(TAG, "Turning the LED %s!", s_led_state == true ? "ON" : "OFF");
         //blink_led();
 
