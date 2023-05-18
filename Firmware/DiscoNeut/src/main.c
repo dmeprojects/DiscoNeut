@@ -26,6 +26,8 @@ static const char *TAG = "main";
 #define LED_PSU_GPIO    0
 #define LED_INTENSITY   10
 
+#define TOTALLEDS 39
+
 /*BUTTON DEFINES*/
 #define MODE_BUTTON_GPIO    8
 
@@ -34,6 +36,8 @@ static const char *TAG = "main";
 #define MIC_SD_GPIO     10
 #define MIC_WS_GPIO     9
 #define MIC_EN_GPIO     1
+
+#define NOISELEVEL      2000
 
 /*MIC BUFFER DEFINES*/
 #define MIC_BUFFER_SIZE 64   //Default 128
@@ -45,21 +49,21 @@ led_strip_handle_t led_strip;
 i2s_chan_handle_t rxHandle;
 i2s_chan_config_t i2s_channel_config = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_AUTO, I2S_ROLE_MASTER);
 i2s_std_config_t i2s_config = 
-{
+{    
     .clk_cfg = 
     {
-        .sample_rate_hz = 44100,
+        .sample_rate_hz = 16000,
         .clk_src = I2S_CLK_SRC_DEFAULT,
         .mclk_multiple = I2S_MCLK_MULTIPLE_384,
 
     },
     .slot_cfg = 
     {
-        .data_bit_width = I2S_DATA_BIT_WIDTH_24BIT,
+        .data_bit_width = I2S_DATA_BIT_WIDTH_32BIT,
         .slot_bit_width = I2S_SLOT_BIT_WIDTH_AUTO,
         .slot_mode = I2S_SLOT_MODE_MONO,
         .slot_mask = I2S_STD_SLOT_LEFT,
-        .ws_width = I2S_DATA_BIT_WIDTH_32BIT,
+        .ws_width = I2S_SLOT_BIT_WIDTH_32BIT,
         .ws_pol = false, 
         .bit_shift = false, 
         .left_align = false, 
@@ -173,15 +177,20 @@ static void configure_led(void)
     interested in the left channel, we must filter this right channel out
     The 4 bytes must be converted to a 24 bit value with a max of 0xFF FF FF FF FF FF
 */
-int16_t get_volume(int16_t* data, size_t len)
+uint32_t get_volume(int32_t* data, size_t len)
 {
-    uint32_t lSampleCount = len / (sizeof(uint16_t));
+    uint32_t lSamples = len / (sizeof(int32_t));
     uint32_t lSampleCounter;
 
-    int64_t lSumSquared = 0;
-    int64_t lSquaredSample = 0;
+    uint16_t lSample;
 
-    for( lSampleCounter = 0; lSampleCounter < lSampleCount; lSampleCounter++)
+    uint64_t lSampleTotal = 0;
+    uint64_t lSampleAverage = 0;
+
+    //int64_t lSumSquared = 0;
+    //int64_t lSquaredSample = 0;
+
+/*     for( lSampleCounter = 0; lSampleCounter < lSampleCount; lSampleCounter++)
     {
         lSquaredSample = data[lSampleCounter] * data[lSampleCounter];
 
@@ -191,17 +200,60 @@ int16_t get_volume(int16_t* data, size_t len)
     //Calculate rms
     int16_t lRmsValue = (int16_t)(sqrt(lSumSquared / lSampleCount));
 
-    return lRmsValue;
+    return lRmsValue; */
+
+    //Calculate average
+    //average is sum of all samples / total of samples
+
+    for (lSampleCounter = 0; lSampleCounter < lSamples; lSampleCounter++)
+    {
+        lSample = abs(data[lSampleCounter]);
+
+/*         if (lSample == 32767)
+        {
+            lSample = 0;
+        } */
+
+        lSampleTotal =+ lSample;
+
+    }
+
+    lSampleTotal = lSampleTotal  / lSamples;
+
+    return (uint32_t)lSampleTotal;
+
+
 }
 
 void audioReceiveTask ( void* pvParams)
 {
-    //uint8_t lStartAudio;
+    //I2S audio variables
+    int16_t lMicData[MIC_BUFFER_SIZE]; //buffer containint 
     size_t bytes_read = 0;
-    int16_t volume;
     esp_err_t lEspError = ESP_FAIL;
+    
+    //VU meter variables
+    const uint8_t lSamples = 64;
 
-    int16_t lMicData[MIC_BUFFER_SIZE];
+    int16_t lVolArray[64] = {0};
+    int16_t lHeigth;
+    int16_t lLevel = 0;
+    int16_t lMinLevel = 0, lMaxLevel = 0;
+    int16_t lMaxLevelAvg = 0, lMinlevelAvg = 0;
+    
+    int16_t volume;
+    uint16_t absVolume;
+    //uint32_t lSample = 0;
+
+    uint8_t lDivide = 3;
+    
+    uint8_t i;   
+
+    
+    uint8_t lLedCounter;
+
+    
+    uint8_t lVolArrayCounter = 0;
 
     // Start I2S data reception
     lEspError = i2s_channel_enable(rxHandle);
@@ -215,27 +267,119 @@ void audioReceiveTask ( void* pvParams)
         bytes_read = 0;
 
         //i2s_read(I2S_NUM_0, i2s_buffer, i2s_config.dma_buf_len * 2, &bytes_read, portMAX_DELAY);
-        lEspError = i2s_channel_read(rxHandle, lMicData, MIC_BUFFER_SIZE, &bytes_read, portMAX_DELAY);
+        lEspError = i2s_channel_read(rxHandle, lMicData, MIC_BUFFER_SIZE * 2, &bytes_read, portMAX_DELAY);
         if(lEspError != ESP_OK)
         {
             ESP_LOGE(TAG, "failed to read channel with error code: %s", esp_err_to_name(lEspError) );
         }
-        else
+
+        //volume = get_volume(lMicData, bytes_read);
+        //ESP_LOGI(TAG, "VOL:%d", volume);
+
+        //volume = ( (lMicData[1] + lMicData[2] + lMicData[3] + lMicData[4]) / 4); //We work for this test with the third sample
+        volume = lMicData[1];
+        //volume--;
+/*         int32_t vol2 = lMicData[1];
+
+        if( vol2 > 0x80000000)
         {
-            //ESP_LOGI(TAG,"Bytes Read: %lu", (uint32_t) bytes_read);
-            //ESP_LOGI(TAG,"%li", lMicData[0]);
+            vol2--;
+            vol2 = ~vol2 ;
         }
 
-        //ESP_LOGI("AudioSample", "Bytes read: %d", (unsigned int) bytes_read);
+        ESP_LOGI(TAG, "Sample:%li", vol2);   */  
 
-        // Calculate the volume of the received audio data
-        volume = get_volume(lMicData, bytes_read);
-        ESP_LOGI(TAG, "VOL:%d", volume);
+        //ESP_LOGI(TAG, "Divide:%d", lDivide);    
 
-        // Clear the I2S buffer for the next read
-        //i2s_zero_dma_buffer(I2S_NUM_0);
+
+        //lSample = volume + 32.767;   //shift value to center of the 16 bit
+
+        absVolume = abs(volume);
+
+/*         if( volume == 32767)
+        {
+            volume = 0;
+        } */
+
+        //ESP_LOGI(TAG, "Volume:%d", absVolume); 
+
+        //Remove noise
+        absVolume = (absVolume <= NOISELEVEL) ? 0: (absVolume - NOISELEVEL);        
+
+
+        //Smooth level
+        lLevel = ((lLevel * 7) + absVolume) >> lDivide;
+
+        uint32_t lDivider = (lMaxLevelAvg - lMinlevelAvg);
+        uint32_t lTeller = (lLevel - lMinlevelAvg);
+
+        float tempResult = (float)(lTeller) / (float)(lDivider);
+
+        tempResult = (TOTALLEDS + 2) * tempResult;
+
+        //Calculate LED heigth
+        //lHeigth = (TOTALLEDS + 2) * (uint16_t)tempResult;
+
+        lHeigth = (uint16_t)tempResult;
+
+        //ESP_LOGI(TAG, "Heigth:%d", lHeigth); 
+
+        //Clip top
+        if (lHeigth < 0)
+        {
+            lHeigth = 0;
+        }
+        else if (lHeigth > TOTALLEDS + 2)
+        {
+            lHeigth = TOTALLEDS + 2;
+        }
+
+        //Set leds
+        for (lLedCounter = 0; lLedCounter < TOTALLEDS; lLedCounter++)
+        {
+            if( lLedCounter >= lHeigth)
+            {
+                led_strip_set_pixel(led_strip, lLedCounter, 0, 0, 0);
+            }
+            else
+            {
+                led_strip_set_pixel(led_strip, lLedCounter, 0, 50, 45);
+            }
+            
+        }
+        led_strip_refresh(led_strip);
+
+        //Save volume to samples
+        lVolArray[lVolArrayCounter] = absVolume;
+        if(++lVolArrayCounter > lSamples)
+        {
+            lVolArrayCounter = 0;
+        }
+
+        //Calculate min/max values
+        for(i=0; i<lSamples; i++)
+        {
+            if( lVolArray[i] < lMinLevel)
+            {
+                lMinLevel = lVolArray[i];
+            }
+            else if (lVolArray[i] > lMaxLevel)
+            {
+                lMaxLevel = lVolArray[i];
+            }            
+        }
+
+        //Check max level boundaries
+        if(lMaxLevel - lMinLevel < (TOTALLEDS +2) )
+        {
+            lMaxLevel = lMinLevel + TOTALLEDS + 2;
+        }
+
+        //Calculate averages
+        lMinlevelAvg = ( lMinlevelAvg * 63 + lMinLevel) >> 6;
+        lMaxLevelAvg = ( lMaxLevel * 63 + lMaxLevel) >> 6;
         
-        vTaskDelay(pdMS_TO_TICKS(50));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
@@ -300,13 +444,13 @@ void app_main()
         //leds_draw_circle();
         //drawCircle();
 
-        readPattern(0, 100, 100);
+        //readPattern(0, 100, 100);
 
-        vTaskDelay(pdMS_TO_TICKS(150));
+        //vTaskDelay(pdMS_TO_TICKS(150));
         //run_led();
 
         //scrollCircle();
 
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+        //vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }

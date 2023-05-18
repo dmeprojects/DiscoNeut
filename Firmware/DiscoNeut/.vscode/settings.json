@@ -5,6 +5,9 @@
         "esp_log.h": "c",
         "i2s_std.h": "c",
         "stdio.h": "c",
-        "inttypes.h": "c"
-    }
+        "inttypes.h": "c",
+        "sdkconfig.h": "c"
+    },
+    "cmake.configureOnOpen": false,
+    "idf.adapterTargetName": "esp32"
 }

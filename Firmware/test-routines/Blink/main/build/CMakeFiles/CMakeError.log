@@ -1,0 +1,73 @@
+Compiling the C compiler identification source file "CMakeCCompilerId.c" failed.
+Compiler: D:/ESP-IDF/Espressif/IDE/tools/esp-clang/15.0.0-23786128ae/esp-clang/bin/clang.exe 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+lld: error: unable to find library -lunwind
+lld: error: unable to find library -lunwind
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" failed.
+Compiler: D:/ESP-IDF/Espressif/IDE/tools/esp-clang/15.0.0-23786128ae/esp-clang/bin/clang++.exe 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+lld: error: unable to find library -lc++
+lld: error: unable to find library -lunwind
+lld: error: unable to find library -lunwind
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+
+
+Detecting C compiler ABI info failed to compile with the following output:
+Change Dir: D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/main/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):D:/ESP-IDF/Espressif/IDE/tools/ninja/1.10.2/ninja.exe cmTC_24c40 && [1/2] Building C object CMakeFiles/cmTC_24c40.dir/CMakeCCompilerABI.c.obj
+clang version 15.0.0 (https://github.com/espressif/llvm-project.git 23786128aea96880a5752f6bd1c22aab27622ccf)
+Target: x86_64-w64-windows-gnu
+Thread model: posix
+InstalledDir: D:/ESP-IDF/Espressif/IDE/tools/esp-clang/15.0.0-23786128ae/esp-clang/bin
+ (in-process)
+ "D:/ESP-IDF/Espressif/IDE/tools/esp-clang/15.0.0-23786128ae/esp-clang/bin/clang.exe" -cc1 -triple x86_64-w64-windows-gnu -emit-obj -mrelax-all --mrelax-relocations -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model pic -pic-level 2 -mframe-pointer=none -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -mms-bitfields -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -v -fcoverage-compilation-dir=D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/main/build/CMakeFiles/CMakeTmp -resource-dir D:/ESP-IDF/Espressif/IDE/tools/esp-clang/15.0.0-23786128ae/esp-clang/lib/clang/15.0.0 -dependency-file "CMakeFiles\\cmTC_24c40.dir\\CMakeCCompilerABI.c.obj.d" -MT CMakeFiles/cmTC_24c40.dir/CMakeCCompilerABI.c.obj -sys-header-deps -internal-isystem D:/ESP-IDF/Espressif/IDE/tools/esp-clang/15.0.0-23786128ae/esp-clang/lib/clang/15.0.0/include -internal-isystem C:/msys64/mingw64/x86_64-w64-mingw32/include -internal-isystem C:/msys64/mingw64/x86_64-w64-mingw32/usr/include -internal-isystem C:/msys64/mingw64/include -fdebug-compilation-dir=D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/main/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fno-use-cxa-atexit -fgnuc-version=4.2.1 -exception-model=seh -faddrsig -o CMakeFiles/cmTC_24c40.dir/CMakeCCompilerABI.c.obj -x c D:/ESP-IDF/Espressif/IDE/tools/cmake/3.24.0/share/cmake-3.24/Modules/CMakeCCompilerABI.c
+clang -cc1 version 15.0.0 based upon LLVM 15.0.0 default target x86_64-w64-mingw32
+ignoring nonexistent directory "C:/msys64/mingw64/x86_64-w64-mingw32/include"
+ignoring nonexistent directory "C:/msys64/mingw64/x86_64-w64-mingw32/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ D:/ESP-IDF/Espressif/IDE/tools/esp-clang/15.0.0-23786128ae/esp-clang/lib/clang/15.0.0/include
+ C:/msys64/mingw64/include
+End of search list.
+[2/2] Linking C executable cmTC_24c40.exe
+FAILED: cmTC_24c40.exe 
+cmd.exe /C "cd . && D:\ESP-IDF\Espressif\IDE\tools\esp-clang\15.0.0-23786128ae\esp-clang\bin\clang.exe  -v CMakeFiles/cmTC_24c40.dir/CMakeCCompilerABI.c.obj -o cmTC_24c40.exe -Wl,--out-implib,libcmTC_24c40.dll.a -Wl,--major-image-version,0,--minor-image-version,0   && cd ."
+clang version 15.0.0 (https://github.com/espressif/llvm-project.git 23786128aea96880a5752f6bd1c22aab27622ccf)
+Target: x86_64-w64-windows-gnu
+Thread model: posix
+InstalledDir: D:/ESP-IDF/Espressif/IDE/tools/esp-clang/15.0.0-23786128ae/esp-clang/bin
+ "D:/ESP-IDF/Espressif/IDE/tools/esp-clang/15.0.0-23786128ae/esp-clang/bin/ld.lld" -m i386pep -Bdynamic -o cmTC_24c40.exe C:/msys64/mingw64/lib/crt2.o C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/12.2.0/crtbegin.o -LC:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/12.2.0 -LC:/msys64/mingw64/x86_64-w64-mingw32/lib -LC:/msys64/mingw64/x86_64-w64-mingw32/mingw/lib -LC:/msys64/mingw64/lib -LC:/msys64/mingw64/x86_64-w64-mingw32/sys-root/mingw/lib CMakeFiles/cmTC_24c40.dir/CMakeCCompilerABI.c.obj --out-implib libcmTC_24c40.dll.a --major-image-version 0 --minor-image-version 0 -lmingw32 D:/ESP-IDF/Espressif/IDE/tools/esp-clang/15.0.0-23786128ae/esp-clang/lib/clang/15.0.0/lib/windows/libclang_rt.builtins-x86_64.a -lunwind -lmoldname -lmingwex -lmsvcrt -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 D:/ESP-IDF/Espressif/IDE/tools/esp-clang/15.0.0-23786128ae/esp-clang/lib/clang/15.0.0/lib/windows/libclang_rt.builtins-x86_64.a -lunwind -lmoldname -lmingwex -lmsvcrt -lkernel32 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/12.2.0/crtend.o
+lld: error: unable to find library -lunwind
+lld: error: unable to find library -lunwind
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+ninja: build stopped: subcommand failed.
+
+
+
+
+Determining if the C compiler works failed with the following output:
+Change Dir: D:/DME-Projects_Software/DiscoNeut/Firmware/test-routines/Blink/main/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):D:/ESP-IDF/Espressif/IDE/tools/ninja/1.10.2/ninja.exe cmTC_2f17a && [1/2] Building C object CMakeFiles/cmTC_2f17a.dir/testCCompiler.c.obj
+[2/2] Linking C executable cmTC_2f17a.exe
+FAILED: cmTC_2f17a.exe 
+cmd.exe /C "cd . && D:\ESP-IDF\Espressif\IDE\tools\esp-clang\15.0.0-23786128ae\esp-clang\bin\clang.exe   CMakeFiles/cmTC_2f17a.dir/testCCompiler.c.obj -o cmTC_2f17a.exe -Wl,--out-implib,libcmTC_2f17a.dll.a -Wl,--major-image-version,0,--minor-image-version,0  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 && cd ."
+lld: error: unable to find library -lunwind
+lld: error: unable to find library -lunwind
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+ninja: build stopped: subcommand failed.
+
+
+

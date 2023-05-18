@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+      {
+          "name": "ESP-IDF Build",
+          "type": "cppdbg",
+          "request": "launch",
+          "program": "${workspaceFolder}/build/bootloader/bootloader.elf",
+          "args": [],
+          "stopAtEntry": false,
+          "cwd": "${workspaceFolder}/Firmware",
+          "environment": [],
+          "externalConsole": true,
+          "MIMode": "gdb",
+          "miDebuggerPath": "${env:IDF_PATH}/components/toolchain/bin/xtensa-esp32-elf-gdb",
+          "setupCommands": [
+              {
+                  "description": "Enable pretty-printing for gdb",
+                  "text": "-enable-pretty-printing",
+                  "ignoreFailures": true
+              }
+          ]
+      }
+  ]
+}

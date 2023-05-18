@@ -3,6 +3,8 @@
 
 #include "stdint.h"
 
+//static uint8_t TOTALLEDS    39
+
 static uint8_t CENTER_LEDS = 20;
 
 /*Circle array
