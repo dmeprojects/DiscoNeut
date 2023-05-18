@@ -28,8 +28,8 @@ static const char *TAG = "main";
 #define LED_PSU_GPIO    0
 #define LED_INTENSITY   10
 
-#define TOTALLEDS 39  //For a single bar
-//#define TOTALLEDS 9
+//#define TOTALLEDS 39  //For a single bar
+#define TOTALLEDS 9
 
 /*BUTTON DEFINES*/
 #define MODE_BUTTON_GPIO    8
@@ -40,11 +40,11 @@ static const char *TAG = "main";
 #define MIC_WS_GPIO     9
 #define MIC_EN_GPIO     1
 
-#define NOISELEVEL      3000  //Default for bar with 39 leds
+//#define NOISELEVEL       3000  //Default for bar with 39 leds
 //#define NOISELEVEL      5000
 
 /*MIC BUFFER DEFINES*/
-#define MIC_BUFFER_SIZE 64   //Default 128
+#define MIC_BUFFER_SIZE 512   //Default 128
 
 /*LED VARIABLES*/
 led_strip_handle_t led_strip;
@@ -191,6 +191,9 @@ void audioReceiveTask ( void* pvParams)
     uint8_t lLedCounter;    
     uint8_t lVolArrayCounter = 0;
 
+    uint32_t noiseLevel = 3000;
+    uint32_t exponent = 41;
+
     // Start I2S data reception
     lEspError = i2s_channel_enable(rxHandle);
     if(lEspError != ESP_OK)
@@ -226,7 +229,9 @@ void audioReceiveTask ( void* pvParams)
         }
 
         //Remove noise
-        volume = (volume <= NOISELEVEL) ? 0: (volume - NOISELEVEL);        
+        
+        volume = (volume <= noiseLevel) ? 0: (volume - noiseLevel); 
+        //volume = (volume <= NOISELEVEL) ? 0: (volume - NOISELEVEL);        
 
         //Smooth level
         lLevel = ((lLevel * 7) + volume) >> 3;
@@ -235,7 +240,11 @@ void audioReceiveTask ( void* pvParams)
         uint32_t lDivider = (lMaxLevelAvg - lMinlevelAvg);
         uint32_t lTeller = (lLevel - lMinlevelAvg);
         float tempResult = (float)(lTeller) / (float)(lDivider);
-        tempResult = (TOTALLEDS + 2) * tempResult;
+        //tempResult = (TOTALLEDS + 2) * tempResult;
+
+        tempResult =  tempResult * (float)exponent;
+
+        
         lHeigth = (uint16_t)tempResult;
 
         //Clip top
@@ -245,7 +254,7 @@ void audioReceiveTask ( void* pvParams)
         }
 
         //Set leds
-        for (lLedCounter = 0; lLedCounter < TOTALLEDS; lLedCounter++)
+/*         for (lLedCounter = 0; lLedCounter < TOTALLEDS; lLedCounter++)
         {
             if( lLedCounter >= lHeigth)
             {
@@ -257,9 +266,9 @@ void audioReceiveTask ( void* pvParams)
             }
             
         }
-        led_strip_refresh(led_strip);
+        led_strip_refresh(led_strip); */
         
-        //drawVuBar ( lHeigth);
+        drawVuBar ( lHeigth);
 
         //Save volume to samples
         lVolArray[lVolArrayCounter] = volume;
@@ -323,6 +332,19 @@ BaseType_t initMicrophone ( void)
         ESP_LOGE("AudioInit", "failed to init channel with error code: %s", esp_err_to_name(lEspError));
         lStatus = pdFALSE;
     }
+
+    //Create audio task
+    lStatus = xTaskCreate( audioReceiveTask, 
+                        "AudioReceiveTask",
+                        4096,
+                        NULL,
+                        tskIDLE_PRIORITY + 2,
+                        audioReceiveTaskHandle );
+    if( lStatus == pdFALSE)
+    {
+        ESP_LOGE("AudioTask", "Failed to create audio task");
+    }
+
     return lStatus;
 }
 
@@ -337,13 +359,12 @@ void app_main()
 
     initLedPower();
 
-    ledPower(1);
-
-
     /*configure input button*/
 
     /*Init I2S interface*/
     initMicrophone();
+
+    ledPower(1);
 
     //led_strip_clear(led_strip);
 
@@ -351,17 +372,7 @@ void app_main()
 
     
 
-    //Create audio task
-    lStatus = xTaskCreate( audioReceiveTask, 
-                        "AudioReceiveTask",
-                        4096,
-                        NULL,
-                        tskIDLE_PRIORITY + 2,
-                        audioReceiveTaskHandle );
-    if( lStatus == pdFALSE)
-    {
-        ESP_LOGE("AudioTask", "Failed to create audio task");
-    }
+
 
     //vTaskSuspend(audioReceiveTaskHandle);
 

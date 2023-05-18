@@ -30,7 +30,7 @@
 
 */
 #define MAX_BAR_HEIGTH      9 + 2   //9 different steps
-#define DIMCOEFFICIENT      5
+#define DIMCOEFFICIENT      7   //default 4
 
 extern led_strip_handle_t led_strip;
 
