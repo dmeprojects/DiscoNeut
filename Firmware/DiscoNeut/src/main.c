@@ -44,7 +44,7 @@ static const char *TAG = "main";
 //#define NOISELEVEL      5000
 
 /*MIC BUFFER DEFINES*/
-#define MIC_BUFFER_SIZE 256   //Default 128
+#define MIC_BUFFER_SIZE 32   //Default 128
 
 /*LED VARIABLES*/
 led_strip_handle_t led_strip;
@@ -192,7 +192,7 @@ void audioReceiveTask ( void* pvParams)
     uint8_t lVolArrayCounter = 0;
 
     uint32_t noiseLevel = 3000;
-    uint32_t exponent = 41;
+    uint32_t exponent = 33;
 
     // Start I2S data reception
     lEspError = i2s_channel_enable(rxHandle);
