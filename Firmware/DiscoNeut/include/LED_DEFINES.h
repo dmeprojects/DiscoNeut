@@ -5,25 +5,25 @@
 
 //static uint8_t TOTALLEDS    39
 
-static uint8_t UPPER_CENTER_LED = 7;
-static uint8_t CENTER_LED = 20;
-static uint8_t LOWER_CENTER_LED = 33;
+static uint8_t UPPER_CENTER_LED = 6;
+static uint8_t CENTER_LED = 19;
+static uint8_t LOWER_CENTER_LED = 32;
 
 /*Circle array
 LED: 7 - 8 - 18 - 34 - 33 - 32 - 21 - 6
 */
 static uint8_t CIRCLE_LEDS[] = {6, 7, 17, 33, 32, 31, 21, 5};
 
-static uint8_t QUARTER_CIRCLE_LEDS[] = {6, 8, 32, 34};
+static uint8_t QUARTER_CIRCLE_LEDS[] = {5, 7, 31, 33};
 
 /*Upper line
 LED: 1 - 13
 */
-static uint8_t UPPER_LINE_LEDS[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}; 
+static uint8_t UPPER_LINE_LEDS[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}; 
 
 //Leds from center
-static uint8_t UPPER_LINE_LEDS_LEFT[] = {6, 5, 4, 3, 2, 1};
-static uint8_t UPPER_LINE_LEDS_RIGHT[] = {7, 8, 9, 10, 11, 12, 13};
+static uint8_t UPPER_LINE_LEDS_LEFT[] = {5, 4, 3, 2, 1, 0};
+static uint8_t UPPER_LINE_LEDS_RIGHT[] = {6, 7, 8, 9, 10, 11, 12};
 
 /*
 Center line
@@ -32,15 +32,15 @@ LED: 26 - 14
 
 static uint8_t CENTER_LINE_LEDS[] = {14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26};
 //Leds from center
-static uint8_t CENTER_LINE_LEDS_LEFT[] = {21, 22, 23, 24, 25, 26};
-static uint8_t CENTER_LINE_LEDS_RIGHT[] = {19, 18, 17, 16, 15, 14};
+static uint8_t CENTER_LINE_LEDS_LEFT[] = {20, 21, 22, 23, 24, 25};
+static uint8_t CENTER_LINE_LEDS_RIGHT[] = {18, 17, 16, 15, 14, 13};
 
 
 /*Bottom line
 LED: 27 - 39*/
 static uint8_t LOWER_LINE_LEDS[] = {27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39};
-static uint8_t LOWER_LINE_LEDS_LEFT[] = {32, 32, 30, 29, 28, 27};
-static uint8_t LOWER_LINE_LEDS_RIGHT[] = {34, 35, 36, 37, 38, 39};
+static uint8_t LOWER_LINE_LEDS_LEFT[] = {31, 30, 29, 28, 27, 26};
+static uint8_t LOWER_LINE_LEDS_RIGHT[] = {33, 34, 35, 36, 37, 38};
 
 /*Standard color defines*/
 #define     ORANGE              0xFF9900

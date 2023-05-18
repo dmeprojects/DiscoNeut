@@ -369,7 +369,7 @@ void app_main()
         {
             drawVuBar((uint32_t)i);
 
-            vTaskDelay(pdMS_TO_TICKS(500));
+            vTaskDelay(pdMS_TO_TICKS(200));
         }
 
         led_strip_clear(led_strip);

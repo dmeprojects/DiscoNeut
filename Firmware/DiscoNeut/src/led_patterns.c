@@ -163,7 +163,7 @@ void drawVuBar ( uint32_t BarHeigth)
         BarHeigth = MAX_BAR_HEIGTH;
     }
 
-    led_strip_clear(led_strip);
+    //led_strip_clear(led_strip);
 
     //first turn all leds off
     for(ledCounter = 0; ledCounter <= TOTAL_LEDS; ledCounter++)
@@ -191,13 +191,15 @@ void drawVuBar ( uint32_t BarHeigth)
 
                  //LEDS left and right on
                 case 2:
-                setColor(GREEN, &ledRed, &ledGreen, &ledBlue);
-                    for(i = CENTER_LED - 1; i <= CENTER_LED + 1; i++)
-                    {                        
-                        led[i][0] = ledRed;
-                        led[i][1] = ledGreen;
-                        led[i][2] = ledBlue;
-                    }
+                    setColor(GREEN, &ledRed, &ledGreen, &ledBlue);
+                    led[CENTER_LED - 1][0] = ledRed;
+                    led[CENTER_LED - 1][1] = ledGreen;
+                    led[CENTER_LED - 1][2] = ledBlue;
+
+                    led[CENTER_LED + 1][0] = ledRed;
+                    led[CENTER_LED + 1][1] = ledGreen;
+                    led[CENTER_LED + 1][2] = ledBlue;
+
                 break;
 
                 //quarter leds on
@@ -290,7 +292,7 @@ void drawVuBar ( uint32_t BarHeigth)
             }
         }
 
-        for (ledCounter = 0; ledCounter <= TOTAL_LEDS; ledCounter++)
+        for (ledCounter = 0; ledCounter < TOTAL_LEDS; ledCounter++)
         {
             led_strip_set_pixel(led_strip, ledCounter, led[ledCounter][0], led[ledCounter][1], led[ledCounter][2]);
         }
