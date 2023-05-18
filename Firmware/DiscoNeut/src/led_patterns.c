@@ -162,9 +162,6 @@ void drawVuBar ( uint32_t BarHeigth)
     {
         BarHeigth = MAX_BAR_HEIGTH;
     }
-
-    //led_strip_clear(led_strip);
-
     //first turn all leds off
     for(ledCounter = 0; ledCounter <= TOTAL_LEDS; ledCounter++)
     {
@@ -173,11 +170,17 @@ void drawVuBar ( uint32_t BarHeigth)
         led[ledCounter][2] = 0; //turn leds off, the color does not matter.
     } 
 
+    //Set Center led to specific color for when there is no audio data
+    setColor(APPLEBLUESEAGREEN, &ledRed, &ledGreen, &ledBlue);
+    led[CENTER_LED][0] = ledRed;
+    led[CENTER_LED][1] = ledGreen;
+    led[CENTER_LED][2] = ledBlue;
+    
     //If there is at leat one led on
     if( BarHeigth)
     {
         //Loop trough all the different spots
-        for(loopCounter = 0; loopCounter < BarHeigth; loopCounter++)
+        for(loopCounter = 1; loopCounter < BarHeigth; loopCounter++)
         {
             switch (loopCounter)
             {
@@ -225,8 +228,6 @@ void drawVuBar ( uint32_t BarHeigth)
                     led[selectedLed][2] = ledBlue;
                 }
                 break;
-
-
 
                 case 5:
                 //Update center LEDS:
@@ -401,6 +402,7 @@ void drawVuBar ( uint32_t BarHeigth)
                     break;
             }
         }
+    }
 
         for (ledCounter = 0; ledCounter < TOTAL_LEDS; ledCounter++)
         {
@@ -408,5 +410,4 @@ void drawVuBar ( uint32_t BarHeigth)
         }
 
         led_strip_refresh(led_strip);
-    }
 }

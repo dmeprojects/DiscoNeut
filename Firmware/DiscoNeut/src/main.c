@@ -44,7 +44,7 @@ static const char *TAG = "main";
 //#define NOISELEVEL      5000
 
 /*MIC BUFFER DEFINES*/
-#define MIC_BUFFER_SIZE 512   //Default 128
+#define MIC_BUFFER_SIZE 256   //Default 128
 
 /*LED VARIABLES*/
 led_strip_handle_t led_strip;
