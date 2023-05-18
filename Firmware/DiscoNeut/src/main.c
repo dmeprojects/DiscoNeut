@@ -28,7 +28,8 @@ static const char *TAG = "main";
 #define LED_PSU_GPIO    0
 #define LED_INTENSITY   10
 
-#define TOTALLEDS 39
+#define TOTALLEDS 39  //For a single bar
+//#define TOTALLEDS 9
 
 /*BUTTON DEFINES*/
 #define MODE_BUTTON_GPIO    8
@@ -39,7 +40,8 @@ static const char *TAG = "main";
 #define MIC_WS_GPIO     9
 #define MIC_EN_GPIO     1
 
-#define NOISELEVEL      3000
+#define NOISELEVEL      3000  //Default for bar with 39 leds
+//#define NOISELEVEL      5000
 
 /*MIC BUFFER DEFINES*/
 #define MIC_BUFFER_SIZE 64   //Default 128
@@ -237,12 +239,12 @@ void audioReceiveTask ( void* pvParams)
         lHeigth = (uint16_t)tempResult;
 
         //Clip top
-/*         if (lHeigth > TOTALLEDS + 2)
+        if (lHeigth > TOTALLEDS + 2)
         {
             lHeigth = TOTALLEDS + 2;
-        } */
+        }
 
-/*         //Set leds
+        //Set leds
         for (lLedCounter = 0; lLedCounter < TOTALLEDS; lLedCounter++)
         {
             if( lLedCounter >= lHeigth)
@@ -255,7 +257,7 @@ void audioReceiveTask ( void* pvParams)
             }
             
         }
-        led_strip_refresh(led_strip); */
+        led_strip_refresh(led_strip);
         
         //drawVuBar ( lHeigth);
 
@@ -335,19 +337,21 @@ void app_main()
 
     initLedPower();
 
+    ledPower(1);
+
 
     /*configure input button*/
 
     /*Init I2S interface*/
     initMicrophone();
 
-    led_strip_clear(led_strip);
-
-    ledPower(1);
+    //led_strip_clear(led_strip);
 
     
 
-/*     //Create audio task
+    
+
+    //Create audio task
     lStatus = xTaskCreate( audioReceiveTask, 
                         "AudioReceiveTask",
                         4096,
@@ -359,13 +363,13 @@ void app_main()
         ESP_LOGE("AudioTask", "Failed to create audio task");
     }
 
-    vTaskSuspend(audioReceiveTaskHandle); */
+    //vTaskSuspend(audioReceiveTaskHandle);
 
 
 
     while (1) {
         
-        for(i = 0; i < 11; i++)
+/*         for(i = 0; i < 11; i++)
         {
             drawVuBar((uint32_t)i);
 
@@ -374,7 +378,7 @@ void app_main()
 
         led_strip_clear(led_strip);
 
-        vTaskDelay(pdMS_TO_TICKS(500));
+        vTaskDelay(pdMS_TO_TICKS(500)); */
 
         //Read button
         //ESP_LOGI(TAG, "Turning the LED %s!", s_led_state == true ? "ON" : "OFF");

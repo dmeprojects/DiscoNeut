@@ -30,7 +30,7 @@
 
 */
 #define MAX_BAR_HEIGTH      9 + 2   //9 different steps
-#define DIMCOEFFICIENT      4
+#define DIMCOEFFICIENT      5
 
 extern led_strip_handle_t led_strip;
 
@@ -191,7 +191,7 @@ void drawVuBar ( uint32_t BarHeigth)
 
                  //LEDS left and right on
                 case 2:
-                    setColor(LIGHTGREEN, &ledRed, &ledGreen, &ledBlue);
+                    setColor(GREEN, &ledRed, &ledGreen, &ledBlue);
                     led[CENTER_LED - 1][0] = ledRed;
                     led[CENTER_LED - 1][1] = ledGreen;
                     led[CENTER_LED - 1][2] = ledBlue;
