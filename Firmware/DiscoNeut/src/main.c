@@ -37,7 +37,7 @@ static const char *TAG = "main";
 #define MIC_WS_GPIO     9
 #define MIC_EN_GPIO     1
 
-#define NOISELEVEL      2000
+#define NOISELEVEL      3000
 
 /*MIC BUFFER DEFINES*/
 #define MIC_BUFFER_SIZE 64   //Default 128
@@ -54,13 +54,13 @@ i2s_std_config_t i2s_config =
     {
         .sample_rate_hz = 16000,
         .clk_src = I2S_CLK_SRC_DEFAULT,
-        .mclk_multiple = I2S_MCLK_MULTIPLE_384,
+        .mclk_multiple = I2S_MCLK_MULTIPLE_128,
 
     },
     .slot_cfg = 
     {
         .data_bit_width = I2S_DATA_BIT_WIDTH_32BIT,
-        .slot_bit_width = I2S_DATA_BIT_WIDTH_32BIT,
+        .slot_bit_width = I2S_SLOT_BIT_WIDTH_AUTO,
         .slot_mode = I2S_SLOT_MODE_MONO,
         .slot_mask = I2S_STD_SLOT_LEFT,
         .ws_width = I2S_SLOT_BIT_WIDTH_32BIT,
@@ -235,14 +235,14 @@ void audioReceiveTask ( void* pvParams)
     //VU meter variables
     const uint8_t lSamples = 64;
 
-    int16_t lVolArray[64] = {0};
-    int16_t lHeigth;
-    int16_t lLevel = 0;
-    int16_t lMinLevel = 0, lMaxLevel = 0;
-    int16_t lMaxLevelAvg = 0, lMinlevelAvg = 0;
+    uint32_t lVolArray[64] = {0};
+    uint32_t lHeigth;
+    uint32_t lLevel = 0;
+    uint32_t lMinLevel = 0, lMaxLevel = 0;
+    uint32_t lMaxLevelAvg = 0, lMinlevelAvg = 0;
     
-    int16_t volume;
-    uint16_t absVolume;
+    uint32_t volume;
+    uint32_t absVolume;
     //uint32_t lSample = 0;
 
     uint8_t lDivide = 3;
@@ -269,7 +269,7 @@ void audioReceiveTask ( void* pvParams)
         bytes_read = 0;
 
         //i2s_read(I2S_NUM_0, i2s_buffer, i2s_config.dma_buf_len * 2, &bytes_read, portMAX_DELAY);
-        lEspError = i2s_channel_read(rxHandle, lMicData, MIC_BUFFER_SIZE, &bytes_read, portMAX_DELAY);
+        lEspError = i2s_channel_read(rxHandle, lMicData, MIC_BUFFER_SIZE * 4, &bytes_read, portMAX_DELAY);
         if(lEspError != ESP_OK)
         {
             ESP_LOGE(TAG, "failed to read channel with error code: %s", esp_err_to_name(lEspError) );
@@ -285,47 +285,25 @@ void audioReceiveTask ( void* pvParams)
         //Used for 32 bit buffer
         uint32_t lTempData = lMicData[0];
 
-        uint32_t lTempDataShifted = lTempData >> 8; //Shift 1 byte to the right
+        uint32_t volume = lTempData >> 8; //Shift 1 byte to the right
 
-        if(lTempData > 0x00800000)
+        if( volume >= 0x00800000)
         {
-            lTempData = lTempData ^ 0xFFFFFFFF;
-            lTempData++;
+            volume = volume ^ 0xFFFFFFFF;
+
+            volume++;
+
+            volume = volume & 0x00FFFFFF;
         }
-
-
-
-
-
-        volume = lMicData[1];
-
-
-
-        //Invert volume
-        volume = volume ^ 0xFFFF;
-
-        volume++;
-
-        volume = volume * - 1;
-        
-
-
-
-        absVolume = abs(volume);
-
-/*         if( volume == 32767)
-        {
-            volume = 0;
-        } */
 
         //ESP_LOGI(TAG, "Volume:%d", absVolume); 
 
         //Remove noise
-        absVolume = (absVolume <= NOISELEVEL) ? 0: (absVolume - NOISELEVEL);        
+        volume = (volume <= NOISELEVEL) ? 0: (volume - NOISELEVEL);        
 
 
         //Smooth level
-        lLevel = ((lLevel * 7) + absVolume) >> lDivide;
+        lLevel = ((lLevel * 7) + volume) >> lDivide;
 
         uint32_t lDivider = (lMaxLevelAvg - lMinlevelAvg);
         uint32_t lTeller = (lLevel - lMinlevelAvg);
@@ -367,7 +345,7 @@ void audioReceiveTask ( void* pvParams)
         led_strip_refresh(led_strip);
 
         //Save volume to samples
-        lVolArray[lVolArrayCounter] = absVolume;
+        lVolArray[lVolArrayCounter] = volume;
         if(++lVolArrayCounter > lSamples)
         {
             lVolArrayCounter = 0;
@@ -396,7 +374,7 @@ void audioReceiveTask ( void* pvParams)
         lMinlevelAvg = ( lMinlevelAvg * 63 + lMinLevel) >> 6;
         lMaxLevelAvg = ( lMaxLevel * 63 + lMaxLevel) >> 6;
         
-        vTaskDelay(pdMS_TO_TICKS(100));
+        //vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
