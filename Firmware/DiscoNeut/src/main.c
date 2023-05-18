@@ -60,7 +60,7 @@ i2s_std_config_t i2s_config =
     .slot_cfg = 
     {
         .data_bit_width = I2S_DATA_BIT_WIDTH_32BIT,
-        .slot_bit_width = I2S_SLOT_BIT_WIDTH_AUTO,
+        .slot_bit_width = I2S_DATA_BIT_WIDTH_32BIT,
         .slot_mode = I2S_SLOT_MODE_MONO,
         .slot_mask = I2S_STD_SLOT_LEFT,
         .ws_width = I2S_SLOT_BIT_WIDTH_32BIT,
@@ -228,7 +228,7 @@ uint32_t get_volume(int32_t* data, size_t len)
 void audioReceiveTask ( void* pvParams)
 {
     //I2S audio variables
-    int16_t lMicData[MIC_BUFFER_SIZE]; //buffer containint 
+    uint32_t lMicData[MIC_BUFFER_SIZE]; //buffer containint 
     size_t bytes_read = 0;
     esp_err_t lEspError = ESP_FAIL;
     
@@ -255,6 +255,8 @@ void audioReceiveTask ( void* pvParams)
     
     uint8_t lVolArrayCounter = 0;
 
+    int16_t *pMicData = &lMicData;
+
     // Start I2S data reception
     lEspError = i2s_channel_enable(rxHandle);
     if(lEspError != ESP_OK)
@@ -267,7 +269,7 @@ void audioReceiveTask ( void* pvParams)
         bytes_read = 0;
 
         //i2s_read(I2S_NUM_0, i2s_buffer, i2s_config.dma_buf_len * 2, &bytes_read, portMAX_DELAY);
-        lEspError = i2s_channel_read(rxHandle, lMicData, MIC_BUFFER_SIZE * 2, &bytes_read, portMAX_DELAY);
+        lEspError = i2s_channel_read(rxHandle, lMicData, MIC_BUFFER_SIZE, &bytes_read, portMAX_DELAY);
         if(lEspError != ESP_OK)
         {
             ESP_LOGE(TAG, "failed to read channel with error code: %s", esp_err_to_name(lEspError) );
@@ -277,22 +279,37 @@ void audioReceiveTask ( void* pvParams)
         //ESP_LOGI(TAG, "VOL:%d", volume);
 
         //volume = ( (lMicData[1] + lMicData[2] + lMicData[3] + lMicData[4]) / 4); //We work for this test with the third sample
-        volume = lMicData[1];
-        //volume--;
-/*         int32_t vol2 = lMicData[1];
 
-        if( vol2 > 0x80000000)
+        //Used for 8 bit buffer
+        //uint32_t lTempData = lMicData[0] << 24 | lMicData[1] << 16 | lMicData[0] << 8 | lMicData[0];
+        //Used for 32 bit buffer
+        uint32_t lTempData = lMicData[0];
+
+        uint32_t lTempDataShifted = lTempData >> 8; //Shift 1 byte to the right
+
+        if(lTempData > 0x00800000)
         {
-            vol2--;
-            vol2 = ~vol2 ;
+            lTempData = lTempData ^ 0xFFFFFFFF;
+            lTempData++;
         }
 
-        ESP_LOGI(TAG, "Sample:%li", vol2);   */  
-
-        //ESP_LOGI(TAG, "Divide:%d", lDivide);    
 
 
-        //lSample = volume + 32.767;   //shift value to center of the 16 bit
+
+
+        volume = lMicData[1];
+
+
+
+        //Invert volume
+        volume = volume ^ 0xFFFF;
+
+        volume++;
+
+        volume = volume * - 1;
+        
+
+
 
         absVolume = abs(volume);
 
