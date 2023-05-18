@@ -214,81 +214,190 @@ void drawVuBar ( uint32_t BarHeigth)
                 }
                 break;
 
+                //center upper and lower leds on
+                case 4:
+                setColor(YELLOW, &ledRed, &ledGreen, &ledBlue);
+                setColor(GREEN, &ledRed, &ledGreen, &ledBlue);
+                    led[UPPER_CENTER_LED - 1][0] = ledRed;
+                    led[UPPER_CENTER_LED - 1][1] = ledGreen;
+                    led[UPPER_CENTER_LED - 1][2] = ledBlue;
+
+                    led[LOWER_CENTER_LED + 1][0] = ledRed;
+                    led[LOWER_CENTER_LED + 1][1] = ledGreen;
+                    led[LOWER_CENTER_LED + 1][2] = ledBlue;
+                break;
+
                 case 5:
                 //Update center LEDS:
-                setColor(ORANGE, &ledRed, &ledGreen, &ledBlue);
-                for( i = 0; i < 3; i++)
-                {
-                    selectedLed = UPPER_LINE_LEDS_LEFT[i];  //Update Upper left
+                    setColor(ORANGE, &ledRed, &ledGreen, &ledBlue);
+                    selectedLed = UPPER_LINE_LEDS_LEFT[1];  //Update Upper left
                     led[selectedLed][0] = ledRed;
                     led[selectedLed][1] = ledGreen;
                     led[selectedLed][2] = ledBlue;
 
-                    selectedLed = UPPER_LINE_LEDS_RIGHT[i];  //Update Upper left
+                    selectedLed = UPPER_LINE_LEDS_RIGHT[1];  //Update Upper left
                     led[selectedLed][0] = ledRed;
                     led[selectedLed][1] = ledGreen;
                     led[selectedLed][2] = ledBlue;
 
-                    selectedLed = CENTER_LINE_LEDS_RIGHT[i];  //Update Upper left
+                    selectedLed = CENTER_LINE_LEDS_RIGHT[1];  //Update Upper left
                     led[selectedLed][0] = ledRed;
                     led[selectedLed][1] = ledGreen;
                     led[selectedLed][2] = ledBlue;
 
-                    selectedLed = CENTER_LINE_LEDS_LEFT[i];  //Update Upper left
+                    selectedLed = CENTER_LINE_LEDS_LEFT[1];  //Update Upper left
                     led[selectedLed][0] = ledRed;
                     led[selectedLed][1] = ledGreen;
                     led[selectedLed][2] = ledBlue;
 
-                    selectedLed = LOWER_LINE_LEDS_LEFT[i];  //Update Upper left
+                    selectedLed = LOWER_LINE_LEDS_LEFT[1];  //Update Upper left
                     led[selectedLed][0] = ledRed;
                     led[selectedLed][1] = ledGreen;
                     led[selectedLed][2] = ledBlue;
 
-                    selectedLed = LOWER_LINE_LEDS_RIGHT[i];  //Update Upper left
+                    selectedLed = LOWER_LINE_LEDS_RIGHT[1];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;            
+
+                break;
+
+                case 6: 
+                    setColor(ORANGE, &ledRed, &ledGreen, &ledBlue);
+                    selectedLed = UPPER_LINE_LEDS_LEFT[2];  //Update Upper left
                     led[selectedLed][0] = ledRed;
                     led[selectedLed][1] = ledGreen;
                     led[selectedLed][2] = ledBlue;
-                }
 
+                    selectedLed = UPPER_LINE_LEDS_RIGHT[2];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;
+
+                    selectedLed = CENTER_LINE_LEDS_RIGHT[2];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;
+
+                    selectedLed = CENTER_LINE_LEDS_LEFT[2];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;
+
+                    selectedLed = LOWER_LINE_LEDS_LEFT[2];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;
+
+                    selectedLed = LOWER_LINE_LEDS_RIGHT[2];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;   
+                break;
+
+                case 7:
+                    setColor(ORANGE, &ledRed, &ledGreen, &ledBlue);
+                    selectedLed = UPPER_LINE_LEDS_LEFT[3];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;
+
+                    selectedLed = UPPER_LINE_LEDS_RIGHT[3];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;
+
+                    selectedLed = CENTER_LINE_LEDS_RIGHT[3];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;
+
+                    selectedLed = CENTER_LINE_LEDS_LEFT[3];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;
+
+                    selectedLed = LOWER_LINE_LEDS_LEFT[3];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;
+
+                    selectedLed = LOWER_LINE_LEDS_RIGHT[3];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;   
                 break;
 
                 case 8:
 
-                setColor(RED, &ledRed, &ledGreen, &ledBlue);
-                for( i = 3; i < 6; i++)
-                {
-                    selectedLed = UPPER_LINE_LEDS_LEFT[i];  //Update Upper left
+                    setColor(RED, &ledRed, &ledGreen, &ledBlue);
+                    selectedLed = UPPER_LINE_LEDS_LEFT[4];  //Update Upper left
                     led[selectedLed][0] = ledRed;
                     led[selectedLed][1] = ledGreen;
                     led[selectedLed][2] = ledBlue;
 
-                    selectedLed = UPPER_LINE_LEDS_RIGHT[i];  //Update Upper left
+                    selectedLed = UPPER_LINE_LEDS_RIGHT[4];  //Update Upper left
                     led[selectedLed][0] = ledRed;
                     led[selectedLed][1] = ledGreen;
                     led[selectedLed][2] = ledBlue;
 
-                    selectedLed = CENTER_LINE_LEDS_RIGHT[i];  //Update Upper left
+                    selectedLed = CENTER_LINE_LEDS_RIGHT[4];  //Update Upper left
                     led[selectedLed][0] = ledRed;
                     led[selectedLed][1] = ledGreen;
                     led[selectedLed][2] = ledBlue;
 
-                    selectedLed = CENTER_LINE_LEDS_LEFT[i];  //Update Upper left
+                    selectedLed = CENTER_LINE_LEDS_LEFT[4];  //Update Upper left
                     led[selectedLed][0] = ledRed;
                     led[selectedLed][1] = ledGreen;
                     led[selectedLed][2] = ledBlue;
 
-                    selectedLed = LOWER_LINE_LEDS_LEFT[i];  //Update Upper left
+                    selectedLed = LOWER_LINE_LEDS_LEFT[4];  //Update Upper left
                     led[selectedLed][0] = ledRed;
                     led[selectedLed][1] = ledGreen;
                     led[selectedLed][2] = ledBlue;
 
-                    selectedLed = LOWER_LINE_LEDS_RIGHT[i];  //Update Upper left
+                    selectedLed = LOWER_LINE_LEDS_RIGHT[4];  //Update Upper left
                     led[selectedLed][0] = ledRed;
                     led[selectedLed][1] = ledGreen;
                     led[selectedLed][2] = ledBlue;
-                }
+                
 
                 break;
+
+                case 9:
+
+                setColor(RED, &ledRed, &ledGreen, &ledBlue);
+                    selectedLed = UPPER_LINE_LEDS_LEFT[5];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;
+
+                    selectedLed = UPPER_LINE_LEDS_RIGHT[5];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;
+
+                    selectedLed = CENTER_LINE_LEDS_RIGHT[5];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;
+
+                    selectedLed = CENTER_LINE_LEDS_LEFT[5];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;
+
+                    selectedLed = LOWER_LINE_LEDS_LEFT[5];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;
+
+                    selectedLed = LOWER_LINE_LEDS_RIGHT[5];  //Update Upper left
+                    led[selectedLed][0] = ledRed;
+                    led[selectedLed][1] = ledGreen;
+                    led[selectedLed][2] = ledBlue;
+
+                    break;
             }
         }
 
