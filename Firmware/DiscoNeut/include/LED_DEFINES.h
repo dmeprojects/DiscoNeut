@@ -43,9 +43,9 @@ static uint8_t LOWER_LINE_LEDS_LEFT[] = {31, 30, 29, 28, 27, 26};
 static uint8_t LOWER_LINE_LEDS_RIGHT[] = {33, 34, 35, 36, 37, 38};
 
 /*Standard color defines*/
-#define     ORANGE              0xFF9900
+#define     ORANGE              0xFF5500
 #define     GREEN               0x00FF00
-#define     LIGHTGREEN          0x00FF88
+#define     LIGHTGREEN          0x66FF99
 #define     RED                 0xFF0000
 #define     BLUE                0x0000FF
 #define     LIGHTBLUE           0xFF66FF

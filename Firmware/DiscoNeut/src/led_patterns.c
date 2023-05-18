@@ -191,7 +191,7 @@ void drawVuBar ( uint32_t BarHeigth)
 
                  //LEDS left and right on
                 case 2:
-                    setColor(GREEN, &ledRed, &ledGreen, &ledBlue);
+                    setColor(LIGHTGREEN, &ledRed, &ledGreen, &ledBlue);
                     led[CENTER_LED - 1][0] = ledRed;
                     led[CENTER_LED - 1][1] = ledGreen;
                     led[CENTER_LED - 1][2] = ledBlue;
@@ -202,9 +202,21 @@ void drawVuBar ( uint32_t BarHeigth)
 
                 break;
 
+                //center upper and lower leds on
+                case 3:                
+                setColor(GREEN, &ledRed, &ledGreen, &ledBlue);
+                    led[UPPER_CENTER_LED][0] = ledRed;
+                    led[UPPER_CENTER_LED][1] = ledGreen;
+                    led[UPPER_CENTER_LED][2] = ledBlue;
+
+                    led[LOWER_CENTER_LED][0] = ledRed;
+                    led[LOWER_CENTER_LED][1] = ledGreen;
+                    led[LOWER_CENTER_LED][2] = ledBlue;
+                break;
+
                 //quarter leds on
-                case 3:
-                setColor(YELLOW, &ledRed, &ledGreen, &ledBlue);
+                case 4:
+                setColor(GREEN, &ledRed, &ledGreen, &ledBlue);
                 for(i = 0; i < 4; i++)
                 {
                     selectedLed = QUARTER_CIRCLE_LEDS[i];                    
@@ -214,18 +226,7 @@ void drawVuBar ( uint32_t BarHeigth)
                 }
                 break;
 
-                //center upper and lower leds on
-                case 4:
-                setColor(YELLOW, &ledRed, &ledGreen, &ledBlue);
-                setColor(GREEN, &ledRed, &ledGreen, &ledBlue);
-                    led[UPPER_CENTER_LED - 1][0] = ledRed;
-                    led[UPPER_CENTER_LED - 1][1] = ledGreen;
-                    led[UPPER_CENTER_LED - 1][2] = ledBlue;
 
-                    led[LOWER_CENTER_LED + 1][0] = ledRed;
-                    led[LOWER_CENTER_LED + 1][1] = ledGreen;
-                    led[LOWER_CENTER_LED + 1][2] = ledBlue;
-                break;
 
                 case 5:
                 //Update center LEDS:
