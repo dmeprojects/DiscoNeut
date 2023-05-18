@@ -19,5 +19,7 @@ int scrollCircle ( void);
 
 void readPattern (uint8_t lPattern, uint8_t lRuns, uint32_t lDelayMs);
 
+void drawVuBar ( uint32_t BarHeigth);
+
 
 #endif

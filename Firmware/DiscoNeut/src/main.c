@@ -87,8 +87,6 @@ i2s_std_config_t i2s_config =
     },
 };
 
-//int16_t i2sBuffer[MIC_BUFFER_SIZE];
-
 TaskHandle_t audioReceiveTaskHandle = NULL;
 
 uint8_t lLed = 0;
@@ -239,12 +237,12 @@ void audioReceiveTask ( void* pvParams)
         lHeigth = (uint16_t)tempResult;
 
         //Clip top
-        if (lHeigth > TOTALLEDS + 2)
+/*         if (lHeigth > TOTALLEDS + 2)
         {
             lHeigth = TOTALLEDS + 2;
-        }
+        } */
 
-        //Set leds
+/*         //Set leds
         for (lLedCounter = 0; lLedCounter < TOTALLEDS; lLedCounter++)
         {
             if( lLedCounter >= lHeigth)
@@ -257,7 +255,9 @@ void audioReceiveTask ( void* pvParams)
             }
             
         }
-        led_strip_refresh(led_strip);
+        led_strip_refresh(led_strip); */
+        
+        drawVuBar ( lHeigth);
 
         //Save volume to samples
         lVolArray[lVolArrayCounter] = volume;
