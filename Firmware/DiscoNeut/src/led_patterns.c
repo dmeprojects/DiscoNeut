@@ -1,10 +1,13 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "led_strip.h"
 #include "sdkconfig.h"
+
+#include "esp_random.h"
 
 /*Header includes*/
 #include "LED_DEFINES.h"
@@ -412,4 +415,134 @@ void drawVuBar ( uint32_t BarHeigth)
         }
 
         led_strip_refresh(led_strip);
+}
+
+void breathing (void)
+{
+    static uint8_t lBreathingStateMachine = 0;
+    uint8_t led[4];     //Led index and color
+    uint8_t previousled[4]; //led index and color
+    uint8_t lMaxValue = 0;
+
+    uint8_t ledArray[39];
+    uint8_t i;
+
+    uint8_t lRGB[3] = { 0 };
+
+    uint8_t index = 0;
+
+    srand((unsigned) xAudioSample );    //Init random number
+
+    for(;;)
+    {
+        switch (lBreathingStateMachine)
+        {
+            case 0: 
+            
+            for( i = 0; i< 39; i++)
+            {
+                led_strip_set_pixel(led_strip, i, 0, 0, 0);    //Set all leds off
+            }
+            led_strip_refresh(led_strip);
+            lBreathingStateMachine++;   //Switch to next state    //Select index 
+
+            break;
+
+            case 1: //Select random LED values
+
+            index = (uint8_t)(rand() %40);   //return 
+            lBreathingStateMachine++;   //Switch to next state
+
+            led[0] = index;
+
+            lMaxValue = 0;
+
+            for(i = 1; i<4; i++)//Set rnd LED color
+            {
+                led[i] = (uint8_t)(rand() % 255);
+                led[i] = led[i] / DIMCOEFFICIENT;     
+
+                if( led[i] > lMaxValue) //select the highest color value, this is needed for our countdown up/down
+                {
+                    lMaxValue = led[i];
+                }    
+
+                if(i < 2)
+                {
+                    lRGB[i] = 0;
+                }                       
+            }
+
+            lBreathingStateMachine++;
+            break;
+
+            case 2: //Turn led slowly on
+
+            for(i = 0; i < lMaxValue; i++)
+            {
+                if( lRGB[0] < led[1])
+                {
+                    lRGB[0]++;
+                }
+                if( lRGB[1] < led[2])
+                {
+                    lRGB[1]++;
+                }
+                if( lRGB[2] < led[2])
+                {
+                    lRGB[1]++;
+                }                
+
+                led_strip_set_pixel(led[0], i, lRGB[0], lRGB[1], lRGB[2]);    //Set all leds off
+
+                led_strip_refresh(led_strip);
+
+                vTaskDelay(pdMS_TO_TICKS(12));
+            }
+
+            lBreathingStateMachine++;
+
+            break;
+
+            case 3:
+                lBreathingStateMachine++;
+            break;
+
+            case 4: //Turn led slowly off,  we dont have case 4, this allows us to  later on implement a delay on
+
+            for(i = lMaxValue; i > 0 ; i--)
+            {
+                if( lRGB[0] > 0)
+                {
+                    lRGB[0]--;
+                }
+                if( lRGB[1] > 0)
+                {
+                    lRGB[1]--;
+                }
+                if( lRGB[2] > 0)
+                {
+                    lRGB[1]--;
+                }                
+
+                led_strip_set_pixel(led[0], i, lRGB[0], lRGB[1], lRGB[2]);    //Set all leds off
+
+                led_strip_refresh(led_strip);
+
+                vTaskDelay(pdMS_TO_TICKS(12));
+            }
+
+            lBreathingStateMachine++;
+
+            break;
+
+            case 5: //Use an additional delay
+
+            vTaskDelay(pdMS_TO_TICKS(500));
+
+            lBreathingStateMachine = 0;
+
+            break;
+        }                  
+    }
 }

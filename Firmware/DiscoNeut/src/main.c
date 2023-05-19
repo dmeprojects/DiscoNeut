@@ -80,9 +80,13 @@ static const char *TAG = "main";
 #define EXAMPLE_ESP_WIFI_CHANNEL   6
 #define EXAMPLE_MAX_STA_CONN (3)
 
+void timer_callback( void *param);
+static void IRAM_ATTR gpio_interrupt_handler(void *args);
+
 SemaphoreHandle_t xLedUpdateSmpr = NULL;
 
 TaskHandle_t audioReceiveTaskHandle = NULL;
+TaskHandle_t LedBreathTaskHandle = NULL;
 
 uint8_t xGlobalStateMachine = 0;
 uint8_t lLed = 0;
@@ -136,15 +140,15 @@ i2s_std_config_t i2s_config =
 const esp_timer_create_args_t my_timer_args = {
       .callback = &timer_callback,
       .name = "Mode Timer"};
-  esp_timer_handle_t timer_handler;
+esp_timer_handle_t timer_handler;
 
-void timerCallback( void *param)
+void timer_callback( void *param)
 {
-    uint32_t lPinlevel;
+    
     //stop timer if needed -> no need for this, this was a one shot
     
     //Read out gpio
-    gpio_get_level(MODE_BUTTON_GPIO, lPinlevel);
+    uint32_t lPinlevel = gpio_get_level(MODE_BUTTON_GPIO);
 
     //if gpio pressed, start timer again
     if( lPinlevel == 0)
@@ -155,7 +159,7 @@ void timerCallback( void *param)
     else
     {
         //Pin has been released
-        xGlobalStateMachine++;
+        xGpioTriggered = 1;
 
         //reenable the interrupt
         gpio_intr_enable(MODE_BUTTON_GPIO);
@@ -170,7 +174,7 @@ void timerCallback( void *param)
 
 static void init_timer(void)
 {
-    ESP_ERROR_CHECK(esp_timer_create(&my_timer_args, &timer_handler));
+        ESP_ERROR_CHECK(esp_timer_create(&my_timer_args, &timer_handler));
 }
 
 static void wifi_event_handler(void *arg, esp_event_base_t event_base,
@@ -305,12 +309,9 @@ static void configure_button (void)
     gpio_set_intr_type(MODE_BUTTON_GPIO, GPIO_INTR_LOW_LEVEL);
 
     gpio_install_isr_service(0);
-    gpio_isr_handler_add( MODE_BUTTON_GPIO, mode_interrupt_handler, (void *)MODE_BUTTON_GPIO);
+    gpio_isr_handler_add( MODE_BUTTON_GPIO, gpio_interrupt_handler, (void *)MODE_BUTTON_GPIO);
 
 }
-
-
-
 
 static void IRAM_ATTR gpio_interrupt_handler(void *args)
 {
@@ -428,36 +429,46 @@ void audioReceiveTask ( void* pvParams)
 
         tempResult = tempResult >> 4;   //Divide by 16
 
-        
         lHeigth = tempResult;
 
-        //Clip top
-        if (lHeigth > TOTALLEDS + 2)
-        {
-            lHeigth = TOTALLEDS + 2;
-        }  
 
-/*         if (lHeigth > 5)
-        {
-            ESP_LOGI(TAG, "Height: %lu", lHeigth);
-        } */      
 
-/*         //Set leds
-        for (lLedCounter = 0; lLedCounter < TOTALLEDS; lLedCounter++)
+        if( xGlobalStateMachine == 2)
         {
-            if( lLedCounter >= lHeigth)
+
+                    //Clip top
+            if (lHeigth > TOTALLEDS + 2)
             {
-                led_strip_set_pixel(led_strip, lLedCounter, 0, 0, 0);
-            }
-            else
-            {
-                led_strip_set_pixel(led_strip, lLedCounter, 0, 50, 45);
-            }
+                lHeigth = TOTALLEDS + 2;
+            } 
+
+            drawVuBar ( lHeigth);
             
         }
-        led_strip_refresh(led_strip); */
+
+        if( xGlobalStateMachine == 3)
+        {
+            if (lHeigth > 41)
+            {
+                lHeigth = 41;
+            }
+
+            //Set leds
+            for (lLedCounter = 0; lLedCounter < TOTALLEDS; lLedCounter++)
+            {
+                if( lLedCounter >= lHeigth)
+                {
+                    led_strip_set_pixel(led_strip, lLedCounter, 0, 0, 0);
+                }
+                else
+                {
+                    led_strip_set_pixel(led_strip, lLedCounter, 0, 40, 20);
+                }
+                
+            }
+            led_strip_refresh(led_strip);  
+        }            
         
-        drawVuBar ( lHeigth);
 
         lVolArray[lVolArrayCounter] = volume;
         if(++lVolArrayCounter >= 64)
@@ -541,6 +552,7 @@ void app_main()
     BaseType_t lStatus = pdFALSE;
     uint8_t loopCounter = 0;
     uint8_t i = 0;
+    uint8_t lBreathStatus = 0;
 
     xLedUpdateSmpr = xSemaphoreCreateBinary();
 
@@ -568,6 +580,24 @@ void app_main()
 
     ledPower(1);
 
+    //Create audio task
+    lStatus = xTaskCreate( breathing, 
+                        "LedBreath",
+                        512,
+                        NULL,
+                        tskIDLE_PRIORITY + 1,
+                        LedBreathTaskHandle );
+    if( lStatus == pdFALSE)
+    {
+        ESP_LOGE("AudioTask", "Failed to create audio task");
+    }
+
+    vTaskSuspend(LedBreathTaskHandle);
+
+    
+
+    init_timer();    
+
     while (1)
     {
 
@@ -578,19 +608,62 @@ void app_main()
             case 0:
             //LED breathing
 
+            switch ( lBreathStatus)
+            {
+                case 0:
+                    vTaskResume(LedBreathTaskHandle);   //Turen on breathing
+                    lBreathStatus++;
+                break;
+
+                case 1:
+
+                if( xGpioTriggered)     //Wait for button interrupt
+                {
+                    xGpioTriggered = 0;
+                    lBreathStatus++;
+                }
+                
+                break;
+
+                case 2:
+
+                vTaskSuspend(LedBreathTaskHandle);  //Turen off breathing
+                lBreathStatus = 0;
+                xGlobalStateMachine++;
+                break;
+            }
+
             break;
 
             case 1:
-            //led random
 
+                if( xGpioTriggered)     //Wait for button interrupt
+                {
+                    xGpioTriggered = 0;
+                    lBreathStatus++;
+                }
+
+                readPattern(0, 100, 100);
             break;
 
             case 2: 
-            //vu meter
+
+            if( xGpioTriggered)     //Wait for button interrupt
+                {
+                    xGpioTriggered = 0;
+                    lBreathStatus++;
+                }
+            //vu meter center
 
             break;
 
             case 3:
+
+                if( xGpioTriggered)     //Wait for button interrupt
+                {
+                    xGpioTriggered = 0;
+                    lBreathStatus++;
+                }
             //idle state for VU meter
             break;
 
