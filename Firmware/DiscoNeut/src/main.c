@@ -34,8 +34,13 @@ using namespace esp_usb;
 #include "esp_log.h"
 #include "nvs_flash.h"
 
+#include "esp_timer.h"
+
 #include "lwip/err.h"
 #include "lwip/sys.h"
+
+#include "esp_task_wdt.h"
+
 
 
 
@@ -71,16 +76,22 @@ static const char *TAG = "main";
 #define MIC_BUFFER_SIZE 64  //Default 128
 
 #define EXAMPLE_ESP_WIFI_SSID "Disconeut"
-#define EXAMPLE_ESP_WIFI_PASS "DsicoNeut"
+#define EXAMPLE_ESP_WIFI_PASS "Disconeut"
 #define EXAMPLE_ESP_WIFI_CHANNEL   6
 #define EXAMPLE_MAX_STA_CONN (3)
+
+SemaphoreHandle_t xLedUpdateSmpr = NULL;
+
+TaskHandle_t audioReceiveTaskHandle = NULL;
+
+uint8_t xGlobalStateMachine = 0;
+uint8_t lLed = 0;
 
 /*LED VARIABLES*/
 led_strip_handle_t led_strip;
 
-SemaphoreHandle_t xLedUpdateSmpr = NULL;
-
 uint32_t xAudioSample;
+uint8_t xGpioTriggered;
 
 /*MIC VARIABLES*/
 i2s_chan_handle_t rxHandle;
@@ -122,9 +133,45 @@ i2s_std_config_t i2s_config =
     },
 };
 
-TaskHandle_t audioReceiveTaskHandle = NULL;
+const esp_timer_create_args_t my_timer_args = {
+      .callback = &timer_callback,
+      .name = "Mode Timer"};
+  esp_timer_handle_t timer_handler;
 
-uint8_t lLed = 0;
+void timerCallback( void *param)
+{
+    uint32_t lPinlevel;
+    //stop timer if needed -> no need for this, this was a one shot
+    
+    //Read out gpio
+    gpio_get_level(MODE_BUTTON_GPIO, lPinlevel);
+
+    //if gpio pressed, start timer again
+    if( lPinlevel == 0)
+    {
+        esp_timer_start_once(timer_handler, 15000);
+
+    }
+    else
+    {
+        //Pin has been released
+        xGlobalStateMachine++;
+
+        //reenable the interrupt
+        gpio_intr_enable(MODE_BUTTON_GPIO);
+    }
+
+    //if gpio is released, increment state machine
+
+    //stop timer
+
+
+}
+
+static void init_timer(void)
+{
+    ESP_ERROR_CHECK(esp_timer_create(&my_timer_args, &timer_handler));
+}
 
 static void wifi_event_handler(void *arg, esp_event_base_t event_base,
                               int32_t event_id, void *event_data)
@@ -189,7 +236,6 @@ void wifi_init_softap()
 }
 
 
-
 static void initLedPower( void )
 {
     gpio_reset_pin(LED_PSU_GPIO);
@@ -252,6 +298,39 @@ static void run_led(void)
     led_strip_refresh(led_strip);
 }
 
+static void configure_button (void)
+{
+    gpio_reset_pin(MODE_BUTTON_GPIO);
+    gpio_set_direction(MODE_BUTTON_GPIO, GPIO_MODE_INPUT);
+    gpio_set_intr_type(MODE_BUTTON_GPIO, GPIO_INTR_LOW_LEVEL);
+
+    gpio_install_isr_service(0);
+    gpio_isr_handler_add( MODE_BUTTON_GPIO, mode_interrupt_handler, (void *)MODE_BUTTON_GPIO);
+
+}
+
+
+
+
+static void IRAM_ATTR gpio_interrupt_handler(void *args)
+{
+    uint8_t pinNumber = (uint8_t)args;
+    //xQueueSendFromISR(interputQueue, &pinNumber, NULL);
+
+    //Check pinnumber
+    if (pinNumber == MODE_BUTTON_GPIO)
+    {
+        gpio_intr_disable(MODE_BUTTON_GPIO);
+
+        esp_timer_start_once(timer_handler, 15000);
+        
+        xGpioTriggered = pinNumber;
+        //disable pin interrupt
+        //Start timer
+
+    }
+}
+
 static void configure_led(void)
 {
     ESP_LOGI(TAG, "Example configured to blink addressable LED!");
@@ -288,8 +367,7 @@ void audioReceiveTask ( void* pvParams)
     uint8_t lLedCounter;    
     uint8_t lVolArrayCounter = 0;
 
-    uint32_t noiseLevel = 1500;
-    uint32_t exponent = 40;
+    uint32_t noiseLevel = 1200;
 
     // Start I2S data reception
     lEspError = i2s_channel_enable(rxHandle);
@@ -312,14 +390,12 @@ void audioReceiveTask ( void* pvParams)
         //Used for 8 bit buffer
         //uint32_t lTempData = lMicData[0] << 24 | lMicData[1] << 16 | lMicData[0] << 8 | lMicData[0];
         //Used for 32 bit buffer
-        if( bytes_read < 4)
-        {
-            led_strip_set_pixel(led_strip, 39, 20, 20, 20);
-        }
 
-        uint32_t lTempData = lMicData[0];
+        uint32_t lTempData = lMicData[31];
 
         uint32_t volume = lTempData >> 8; //Shift 1 byte to the right
+
+        
 
         if( volume >= 0x00800000)
         {
@@ -328,7 +404,9 @@ void audioReceiveTask ( void* pvParams)
             volume++;
 
             volume = volume & 0x00FFFFFF;
-        }       
+        }  
+
+        xAudioSample = volume;     
 
         //Remove noise
         
@@ -466,7 +544,7 @@ void app_main()
 
     xLedUpdateSmpr = xSemaphoreCreateBinary();
 
-    esp_err_t ret = nvs_flash_init();
+/*     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
     {
         ESP_ERROR_CHECK(nvs_flash_erase());
@@ -475,8 +553,7 @@ void app_main()
     ESP_ERROR_CHECK(ret);
 
     ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
-    wifi_init_softap();
-
+    wifi_init_softap(); */    
 
     /* Configure the peripheral according to the LED type */
     configure_led();
@@ -484,13 +561,42 @@ void app_main()
     initLedPower();
 
     /*configure input button*/
+    configure_button();
 
     /*Init I2S interface*/
     initMicrophone();
 
     ledPower(1);
 
-    while (1) {
+    while (1)
+    {
+
+        esp_task_wdt_reset();   //reset task watchdog
+
+        switch(xGlobalStateMachine)
+        {
+            case 0:
+            //LED breathing
+
+            break;
+
+            case 1:
+            //led random
+
+            break;
+
+            case 2: 
+            //vu meter
+
+            break;
+
+            case 3:
+            //idle state for VU meter
+            break;
+
+            default:
+            xGlobalStateMachine = 0;
+        }
         
 /*         for(i = 0; i < 11; i++)
         {

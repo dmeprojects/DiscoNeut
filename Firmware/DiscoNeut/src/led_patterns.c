@@ -32,6 +32,8 @@
 #define MAX_BAR_HEIGTH      9 + 2   //9 different steps
 #define DIMCOEFFICIENT      7   //default 4
 
+extern uint32_t xAudioSample;
+
 extern led_strip_handle_t led_strip;
 
 static void setColor( uint32_t color, uint8_t *red, uint8_t *green, uint8_t *blue)
