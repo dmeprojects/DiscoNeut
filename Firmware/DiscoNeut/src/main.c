@@ -68,7 +68,7 @@ static const char *TAG = "main";
 //#define NOISELEVEL      5000
 
 /*MIC BUFFER DEFINES*/
-#define MIC_BUFFER_SIZE 1  //Default 128
+#define MIC_BUFFER_SIZE 64  //Default 128
 
 #define EXAMPLE_ESP_WIFI_SSID "Disconeut"
 #define EXAMPLE_ESP_WIFI_PASS "DsicoNeut"
@@ -89,7 +89,7 @@ i2s_std_config_t i2s_config =
 {    
     .clk_cfg = 
     {
-        .sample_rate_hz = 16000,
+        .sample_rate_hz = 8000,
         .clk_src = I2S_CLK_SRC_DEFAULT,
         .mclk_multiple = I2S_MCLK_MULTIPLE_128,
     },
@@ -312,6 +312,11 @@ void audioReceiveTask ( void* pvParams)
         //Used for 8 bit buffer
         //uint32_t lTempData = lMicData[0] << 24 | lMicData[1] << 16 | lMicData[0] << 8 | lMicData[0];
         //Used for 32 bit buffer
+        if( bytes_read < 4)
+        {
+            led_strip_set_pixel(led_strip, 39, 20, 20, 20);
+        }
+
         uint32_t lTempData = lMicData[0];
 
         uint32_t volume = lTempData >> 8; //Shift 1 byte to the right
@@ -323,9 +328,7 @@ void audioReceiveTask ( void* pvParams)
             volume++;
 
             volume = volume & 0x00FFFFFF;
-        }
-
-        
+        }       
 
         //Remove noise
         
@@ -336,24 +339,33 @@ void audioReceiveTask ( void* pvParams)
         lLevel = ((lLevel * 7) + volume) >> 3;
 
         //Calculate LED heigth ( TODO: optimize function)
+        uint32_t lTeller = (lLevel - lMinlevelAvg) << 4;    //*16
         uint32_t lDivider = (lMaxLevelAvg - lMinlevelAvg);
-        uint32_t lTeller = (lLevel - lMinlevelAvg);
-        float tempResult = (float)(lTeller) / (float)(lDivider);
+        
+        //float tempResult = (float)(lTeller) / (float)(lDivider);
+        uint32_t tempResult = (lTeller / lDivider);
         //tempResult = (TOTALLEDS + 2) * tempResult;
 
-        tempResult =  tempResult * (float)exponent;
+        tempResult =  tempResult * 11;
+
+        tempResult = tempResult >> 4;   //Divide by 16
 
         
-        lHeigth = (uint16_t)tempResult;
+        lHeigth = tempResult;
 
         //Clip top
         if (lHeigth > TOTALLEDS + 2)
         {
             lHeigth = TOTALLEDS + 2;
-        }        
+        }  
 
-        //Set leds
-/*         for (lLedCounter = 0; lLedCounter < TOTALLEDS; lLedCounter++)
+/*         if (lHeigth > 5)
+        {
+            ESP_LOGI(TAG, "Height: %lu", lHeigth);
+        } */      
+
+/*         //Set leds
+        for (lLedCounter = 0; lLedCounter < TOTALLEDS; lLedCounter++)
         {
             if( lLedCounter >= lHeigth)
             {
@@ -369,15 +381,14 @@ void audioReceiveTask ( void* pvParams)
         
         drawVuBar ( lHeigth);
 
-        //Save volume to samples
         lVolArray[lVolArrayCounter] = volume;
-        if(++lVolArrayCounter > lSamples)
+        if(++lVolArrayCounter >= 64)
         {
             lVolArrayCounter = 0;
         }
 
         //Calculate min/max values
-        for(i=0; i<lSamples; i++)
+        for(i=0; i<64; i++)
         {
             if( lVolArray[i] < lMinLevel)
             {
@@ -390,17 +401,17 @@ void audioReceiveTask ( void* pvParams)
         }
 
         //Check max level boundaries
-        if(lMaxLevel - lMinLevel < (TOTALLEDS +2) )
+        if(lMaxLevel - lMinLevel < (TOTALLEDS + 2) )
         {
             lMaxLevel = lMinLevel + TOTALLEDS + 2;
         }
 
         //Calculate averages
         lMinlevelAvg = ( lMinlevelAvg * 63 + lMinLevel) >> 6;
-        lMaxLevelAvg = ( lMaxLevel * 63 + lMaxLevel) >> 6;
+        lMaxLevelAvg = ( lMaxLevelAvg * 63 + lMaxLevel) >> 6;
 
         //No delay needed for now.  This can be implemented to make the visualisation more lazy    
-        vTaskDelay(pdMS_TO_TICKS(15));
+        //vTaskDelay(pdMS_TO_TICKS(15));
     }
 }
 
