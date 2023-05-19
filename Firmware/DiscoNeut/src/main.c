@@ -288,8 +288,8 @@ void audioReceiveTask ( void* pvParams)
     uint8_t lLedCounter;    
     uint8_t lVolArrayCounter = 0;
 
-    uint32_t noiseLevel = 3000;
-    uint32_t exponent = 33;
+    uint32_t noiseLevel = 1500;
+    uint32_t exponent = 40;
 
     // Start I2S data reception
     lEspError = i2s_channel_enable(rxHandle);
@@ -350,16 +350,7 @@ void audioReceiveTask ( void* pvParams)
         if (lHeigth > TOTALLEDS + 2)
         {
             lHeigth = TOTALLEDS + 2;
-        }
-
-        if( xSemaphoreTake(xLedUpdateSmpr, pdMS_TO_TICKS(2)))
-        {
-            xAudioSample = lHeigth;
-
-            xSemaphoreGive(xLedUpdateSmpr);
-        }
-
-        
+        }        
 
         //Set leds
 /*         for (lLedCounter = 0; lLedCounter < TOTALLEDS; lLedCounter++)
