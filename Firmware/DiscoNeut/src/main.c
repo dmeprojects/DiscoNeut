@@ -73,7 +73,7 @@ static const char *TAG = "main";
 //#define NOISELEVEL      5000
 
 /*MIC BUFFER DEFINES*/
-#define MIC_BUFFER_SIZE 64  //Default 128
+#define MIC_BUFFER_SIZE 16  //Default 128
 
 #define EXAMPLE_ESP_WIFI_SSID "Disconeut"
 #define EXAMPLE_ESP_WIFI_PASS "Disconeut"
@@ -104,7 +104,7 @@ i2s_std_config_t i2s_config =
 {    
     .clk_cfg = 
     {
-        .sample_rate_hz = 8000,
+        .sample_rate_hz = 16000,
         .clk_src = I2S_CLK_SRC_DEFAULT,
         .mclk_multiple = I2S_MCLK_MULTIPLE_128,
     },
@@ -368,7 +368,7 @@ void audioReceiveTask ( void* pvParams)
     uint8_t lLedCounter;    
     uint8_t lVolArrayCounter = 0;
 
-    uint32_t noiseLevel = 1200;
+    uint32_t noiseLevel = 1500;     //1200 is "noisy", 1500 does not move when no sound arround
 
     uint8_t visualisation = 2;
 
@@ -394,7 +394,7 @@ void audioReceiveTask ( void* pvParams)
         //uint32_t lTempData = lMicData[0] << 24 | lMicData[1] << 16 | lMicData[0] << 8 | lMicData[0];
         //Used for 32 bit buffer
 
-        uint32_t lTempData = lMicData[31];
+        uint32_t lTempData = lMicData[MIC_BUFFER_SIZE / 2];
 
         uint32_t volume = lTempData >> 8; //Shift 1 byte to the right
 
@@ -427,16 +427,15 @@ void audioReceiveTask ( void* pvParams)
         uint32_t tempResult = (lTeller / lDivider);
         //tempResult = (TOTALLEDS + 2) * tempResult;
 
+
+        if( visualisation == 2)
+        {
+
         tempResult =  tempResult * 11;
 
         tempResult = tempResult >> 4;   //Divide by 16
 
         lHeigth = tempResult;
-
-
-
-        if( visualisation == 2)
-        {
 
                     //Clip top
             if (lHeigth > TOTALLEDS + 2)
@@ -450,6 +449,14 @@ void audioReceiveTask ( void* pvParams)
 
         if( visualisation == 3)
         {
+
+            tempResult =  tempResult * 11;
+
+
+            tempResult = tempResult >> 4;   //Divide by 16
+
+            lHeigth = tempResult;
+
             if (lHeigth > 41)
             {
                 lHeigth = 41;
@@ -502,7 +509,7 @@ void audioReceiveTask ( void* pvParams)
         lMaxLevelAvg = ( lMaxLevelAvg * 63 + lMaxLevel) >> 6;
 
         //No delay needed for now.  This can be implemented to make the visualisation more lazy    
-        vTaskDelay(pdMS_TO_TICKS(5));
+        //vTaskDelay(pdMS_TO_TICKS(5));
     }
 }
 
@@ -592,7 +599,7 @@ void app_main()
     while (1)
     {
 
-        esp_task_wdt_reset();   //reset task watchdog
+        //esp_task_wdt_reset();   //reset task watchdog
 
 /*         switch(xGlobalStateMachine)
         {

@@ -33,7 +33,7 @@
 
 */
 #define MAX_BAR_HEIGTH      9 + 2   //9 different steps
-#define DIMCOEFFICIENT      7   //default 4
+#define DIMCOEFFICIENT      8   //default 4
 
 extern uint32_t xAudioSample;
 
@@ -191,7 +191,7 @@ void drawVuBar ( uint32_t BarHeigth)
             {
                 //only center led on, center led must always be on
                 case 1:
-                    setColor(LIGHTGREEN, &ledRed, &ledGreen, &ledBlue);
+                    setColor(PURPLE, &ledRed, &ledGreen, &ledBlue);
                     led[CENTER_LED][0] = ledRed;
                     led[CENTER_LED][1] = ledGreen;
                     led[CENTER_LED][2] = ledBlue;
@@ -199,7 +199,7 @@ void drawVuBar ( uint32_t BarHeigth)
 
                  //LEDS left and right on
                 case 2:
-                    setColor(GREEN, &ledRed, &ledGreen, &ledBlue);
+                    setColor(PINK, &ledRed, &ledGreen, &ledBlue);
                     led[CENTER_LED - 1][0] = ledRed;
                     led[CENTER_LED - 1][1] = ledGreen;
                     led[CENTER_LED - 1][2] = ledBlue;
@@ -212,7 +212,7 @@ void drawVuBar ( uint32_t BarHeigth)
 
                 //center upper and lower leds on
                 case 3:                
-                //setColor(GREEN, &ledRed, &ledGreen, &ledBlue);
+                setColor(LIGHTGREEN, &ledRed, &ledGreen, &ledBlue);
                     led[UPPER_CENTER_LED][0] = ledRed;
                     led[UPPER_CENTER_LED][1] = ledGreen;
                     led[UPPER_CENTER_LED][2] = ledBlue;
@@ -224,7 +224,7 @@ void drawVuBar ( uint32_t BarHeigth)
 
                 //quarter leds on
                 case 4:
-                //setColor(GREEN, &ledRed, &ledGreen, &ledBlue);
+                setColor(GREEN, &ledRed, &ledGreen, &ledBlue);
                 for(i = 0; i < 4; i++)
                 {
                     selectedLed = QUARTER_CIRCLE_LEDS[i];                    
@@ -236,7 +236,7 @@ void drawVuBar ( uint32_t BarHeigth)
 
                 case 5:
                 //Update center LEDS:
-                    setColor(ORANGE, &ledRed, &ledGreen, &ledBlue);
+                    setColor(YELLOW, &ledRed, &ledGreen, &ledBlue);
                     selectedLed = UPPER_LINE_LEDS_LEFT[1];  //Update Upper left
                     led[selectedLed][0] = ledRed;
                     led[selectedLed][1] = ledGreen;
@@ -270,7 +270,7 @@ void drawVuBar ( uint32_t BarHeigth)
                 break;
 
                 case 6: 
-                    //setColor(ORANGE, &ledRed, &ledGreen, &ledBlue);
+                    setColor(ORANGE, &ledRed, &ledGreen, &ledBlue);
                     selectedLed = UPPER_LINE_LEDS_LEFT[2];  //Update Upper left
                     led[selectedLed][0] = ledRed;
                     led[selectedLed][1] = ledGreen;
