@@ -370,6 +370,8 @@ void audioReceiveTask ( void* pvParams)
 
     uint32_t noiseLevel = 1200;
 
+    uint8_t visualisation = 2;
+
     // Start I2S data reception
     lEspError = i2s_channel_enable(rxHandle);
     if(lEspError != ESP_OK)
@@ -433,7 +435,7 @@ void audioReceiveTask ( void* pvParams)
 
 
 
-        if( xGlobalStateMachine == 2)
+        if( visualisation == 2)
         {
 
                     //Clip top
@@ -446,7 +448,7 @@ void audioReceiveTask ( void* pvParams)
             
         }
 
-        if( xGlobalStateMachine == 3)
+        if( visualisation == 3)
         {
             if (lHeigth > 41)
             {
@@ -500,7 +502,7 @@ void audioReceiveTask ( void* pvParams)
         lMaxLevelAvg = ( lMaxLevelAvg * 63 + lMaxLevel) >> 6;
 
         //No delay needed for now.  This can be implemented to make the visualisation more lazy    
-        //vTaskDelay(pdMS_TO_TICKS(15));
+        vTaskDelay(pdMS_TO_TICKS(5));
     }
 }
 
@@ -544,6 +546,8 @@ BaseType_t initMicrophone ( void)
         ESP_LOGE("AudioTask", "Failed to create audio task");
     }
 
+    //vTaskSuspend(audioReceiveTaskHandle);
+
     return lStatus;
 }
 
@@ -556,7 +560,7 @@ void app_main()
 
     xLedUpdateSmpr = xSemaphoreCreateBinary();
 
-/*     esp_err_t ret = nvs_flash_init();
+/*      esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
     {
         ESP_ERROR_CHECK(nvs_flash_erase());
@@ -565,7 +569,7 @@ void app_main()
     ESP_ERROR_CHECK(ret);
 
     ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
-    wifi_init_softap(); */    
+    wifi_init_softap(); */
 
     /* Configure the peripheral according to the LED type */
     configure_led();
@@ -581,20 +585,7 @@ void app_main()
     ledPower(1);
 
     //Create audio task
-    lStatus = xTaskCreate( breathing, 
-                        "LedBreath",
-                        512,
-                        NULL,
-                        tskIDLE_PRIORITY + 1,
-                        LedBreathTaskHandle );
-    if( lStatus == pdFALSE)
-    {
-        ESP_LOGE("AudioTask", "Failed to create audio task");
-    }
-
-    vTaskSuspend(LedBreathTaskHandle);
-
-    
+ 
 
     init_timer();    
 
@@ -603,7 +594,7 @@ void app_main()
 
         esp_task_wdt_reset();   //reset task watchdog
 
-        switch(xGlobalStateMachine)
+/*         switch(xGlobalStateMachine)
         {
             case 0:
             //LED breathing
@@ -611,11 +602,8 @@ void app_main()
             switch ( lBreathStatus)
             {
                 case 0:
-                    vTaskResume(LedBreathTaskHandle);   //Turen on breathing
-                    lBreathStatus++;
-                break;
 
-                case 1:
+                breathing();
 
                 if( xGpioTriggered)     //Wait for button interrupt
                 {
@@ -625,9 +613,8 @@ void app_main()
                 
                 break;
 
-                case 2:
+                case 1:
 
-                vTaskSuspend(LedBreathTaskHandle);  //Turen off breathing
                 lBreathStatus = 0;
                 xGlobalStateMachine++;
                 break;
@@ -669,7 +656,7 @@ void app_main()
 
             default:
             xGlobalStateMachine = 0;
-        }
+        } */
         
 /*         for(i = 0; i < 11; i++)
         {

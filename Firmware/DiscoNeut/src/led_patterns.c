@@ -421,10 +421,10 @@ void breathing (void)
 {
     static uint8_t lBreathingStateMachine = 0;
     uint8_t led[4];     //Led index and color
-    uint8_t previousled[4]; //led index and color
+    //uint8_t previousled[4]; //led index and color
     uint8_t lMaxValue = 0;
 
-    uint8_t ledArray[39];
+    //uint8_t ledArray[39];
     uint8_t i;
 
     uint8_t lRGB[3] = { 0 };
@@ -433,9 +433,7 @@ void breathing (void)
 
     srand((unsigned) xAudioSample );    //Init random number
 
-    for(;;)
-    {
-        switch (lBreathingStateMachine)
+     switch (lBreathingStateMachine)
         {
             case 0: 
             
@@ -544,5 +542,4 @@ void breathing (void)
 
             break;
         }                  
-    }
 }
