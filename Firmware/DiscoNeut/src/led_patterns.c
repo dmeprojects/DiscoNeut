@@ -265,7 +265,7 @@ void drawVuBar ( uint32_t BarHeigth)
                 break;
 
                 case 6: 
-                    setColor(ORANGE, &ledRed, &ledGreen, &ledBlue);
+                    //setColor(ORANGE, &ledRed, &ledGreen, &ledBlue);
                     selectedLed = UPPER_LINE_LEDS_LEFT[2];  //Update Upper left
                     led[selectedLed][0] = ledRed;
                     led[selectedLed][1] = ledGreen;
@@ -298,7 +298,7 @@ void drawVuBar ( uint32_t BarHeigth)
                 break;
 
                 case 7:
-                    setColor(ORANGE, &ledRed, &ledGreen, &ledBlue);
+                    //setColor(ORANGE, &ledRed, &ledGreen, &ledBlue);
                     selectedLed = UPPER_LINE_LEDS_LEFT[3];  //Update Upper left
                     led[selectedLed][0] = ledRed;
                     led[selectedLed][1] = ledGreen;
@@ -368,7 +368,7 @@ void drawVuBar ( uint32_t BarHeigth)
 
                 case 9:
 
-                setColor(RED, &ledRed, &ledGreen, &ledBlue);
+                //setColor(RED, &ledRed, &ledGreen, &ledBlue);
                     selectedLed = UPPER_LINE_LEDS_LEFT[5];  //Update Upper left
                     led[selectedLed][0] = ledRed;
                     led[selectedLed][1] = ledGreen;

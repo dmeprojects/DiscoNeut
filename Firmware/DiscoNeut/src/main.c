@@ -68,7 +68,7 @@ static const char *TAG = "main";
 //#define NOISELEVEL      5000
 
 /*MIC BUFFER DEFINES*/
-#define MIC_BUFFER_SIZE 3   //Default 128
+#define MIC_BUFFER_SIZE 1  //Default 128
 
 #define EXAMPLE_ESP_WIFI_SSID "Disconeut"
 #define EXAMPLE_ESP_WIFI_PASS "DsicoNeut"
@@ -77,6 +77,10 @@ static const char *TAG = "main";
 
 /*LED VARIABLES*/
 led_strip_handle_t led_strip;
+
+SemaphoreHandle_t xLedUpdateSmpr = NULL;
+
+uint32_t xAudioSample;
 
 /*MIC VARIABLES*/
 i2s_chan_handle_t rxHandle;
@@ -321,6 +325,8 @@ void audioReceiveTask ( void* pvParams)
             volume = volume & 0x00FFFFFF;
         }
 
+        
+
         //Remove noise
         
         volume = (volume <= noiseLevel) ? 0: (volume - noiseLevel); 
@@ -345,6 +351,15 @@ void audioReceiveTask ( void* pvParams)
         {
             lHeigth = TOTALLEDS + 2;
         }
+
+        if( xSemaphoreTake(xLedUpdateSmpr, pdMS_TO_TICKS(2)))
+        {
+            xAudioSample = lHeigth;
+
+            xSemaphoreGive(xLedUpdateSmpr);
+        }
+
+        
 
         //Set leds
 /*         for (lLedCounter = 0; lLedCounter < TOTALLEDS; lLedCounter++)
@@ -394,7 +409,7 @@ void audioReceiveTask ( void* pvParams)
         lMaxLevelAvg = ( lMaxLevel * 63 + lMaxLevel) >> 6;
 
         //No delay needed for now.  This can be implemented to make the visualisation more lazy    
-        //vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(15));
     }
 }
 
@@ -431,7 +446,7 @@ BaseType_t initMicrophone ( void)
                         "AudioReceiveTask",
                         4096,
                         NULL,
-                        tskIDLE_PRIORITY + 2,
+                        tskIDLE_PRIORITY + 1,
                         audioReceiveTaskHandle );
     if( lStatus == pdFALSE)
     {
@@ -447,6 +462,8 @@ void app_main()
     uint8_t loopCounter = 0;
     uint8_t i = 0;
 
+    xLedUpdateSmpr = xSemaphoreCreateBinary();
+
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
     {
@@ -457,7 +474,6 @@ void app_main()
 
     ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
     wifi_init_softap();
-
 
 
     /* Configure the peripheral according to the LED type */
@@ -471,18 +487,6 @@ void app_main()
     initMicrophone();
 
     ledPower(1);
-
-    //led_strip_clear(led_strip);
-
-    
-
-    
-
-
-
-    //vTaskSuspend(audioReceiveTaskHandle);
-
-
 
     while (1) {
         
@@ -512,5 +516,20 @@ void app_main()
         //scrollCircle();
 
         //vTaskDelay(100 / portTICK_PERIOD_MS);
+
+/*         ESP_LOGI(TAG, "Idle");
+
+        if( xSemaphoreTake(xLedUpdateSmpr, portMAX_DELAY))
+        {
+            drawVuBar ( xAudioSample);
+
+            xSemaphoreGive(xLedUpdateSmpr);
+        } */
+
+        
+
+        //vTaskDelay(pdMS_TO_TICKS(60));
+
+
     }
 }
