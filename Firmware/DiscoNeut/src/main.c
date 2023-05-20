@@ -368,7 +368,7 @@ void audioReceiveTask ( void* pvParams)
     uint8_t lLedCounter;    
     uint8_t lVolArrayCounter = 0;
 
-    uint32_t noiseLevel = 1500;     //1200 is "noisy", 1500 does not move when no sound arround
+    uint32_t noiseLevel = 1200;     //1200 is "noisy", 1500 does not move when no sound arround
 
     uint8_t visualisation = 2;
 
@@ -438,9 +438,9 @@ void audioReceiveTask ( void* pvParams)
         lHeigth = tempResult;
 
                     //Clip top
-            if (lHeigth > TOTALLEDS + 2)
+            if (lHeigth > TOTALLEDS + 3)
             {
-                lHeigth = TOTALLEDS + 2;
+                lHeigth = TOTALLEDS + 3;
             } 
 
             drawVuBar ( lHeigth);

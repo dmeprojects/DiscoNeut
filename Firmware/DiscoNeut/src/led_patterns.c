@@ -163,9 +163,9 @@ void drawVuBar ( uint32_t BarHeigth)
     uint8_t loopCounter;    //Counts the phases to set all the colors 
 
     //Clip LED heigth
-    if( BarHeigth > MAX_BAR_HEIGTH)
+    if( BarHeigth > 10)
     {
-        BarHeigth = MAX_BAR_HEIGTH;
+        BarHeigth = 10;
     }
     //first turn all leds off
     for(ledCounter = 0; ledCounter <= TOTAL_LEDS; ledCounter++)
@@ -185,7 +185,7 @@ void drawVuBar ( uint32_t BarHeigth)
     if( BarHeigth)
     {
         //Loop trough all the different spots
-        for(loopCounter = 1; loopCounter < BarHeigth; loopCounter++)
+        for(loopCounter = 1; loopCounter <= BarHeigth; loopCounter++)
         {
             switch (loopCounter)
             {
